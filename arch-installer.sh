@@ -123,37 +123,6 @@ prepare_drives() {
 	esac
 }
 
-fdisk_load() {
-
-	{       i="0"
-			while (true)
-	   		do
-			proc=$(ps aux | grep -v grep | grep -e "fdisk")
-				if [[ "$proc" == "" ]]; then break; fi
-				    sleep 0
-				    echo $i
-				    i=$(expr $i + 1)
-			done
-			echo 100
-			sleep 1
-	} | whiptail --title "Arch Linux Installer" --gauge "Partitioning Drive" 8 78 0
-}
-
-mkfs_load() {
-    {       i="0"
-            while (true)
-            do
-            proc=$(ps aux | grep -v grep | grep -e "mkfs")
-              if [[ "$proc" == "" ]]; then break; fi
-                 sleep 0.5
-                 echo $i
-                 i=$(expr $i + 1)
-         done
-           echo 100
-            sleep 1
-    } | whiptail --title "Arch Linux Installer" --gauge "Please wait while creating file system(s)..." 8 78 0
-}
-
 update_mirrors() {
 	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to update your mirrorlist now?" 10 60) then
 		wget -O mirrorlist "https://www.archlinux.org/mirrorlist/?country=US&protocol=http"
