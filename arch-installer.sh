@@ -123,13 +123,13 @@ prepare_drives() {
 	esac
 }
 
-update_mirrors() {
-	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to update your mirrorlist now?" 10 60) then
-		wget -O mirrorlist "https://www.archlinux.org/mirrorlist/?country=US&protocol=http"
-  		sed 's/#//' mirrorlist > /etc/pacman.d/mirrorlist
-	fi
-	clear
-}
+#update_mirrors() {
+#	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to update your mirrorlist now?" 10 60) then
+#		wget -O mirrorlist "https://www.archlinux.org/mirrorlist/?country=US&protocol=http"
+#  		sed 's/#//' mirrorlist > /etc/pacman.d/mirrorlist
+#	fi
+#	clear
+#}
 
 install_base() {
 	if [ -n "$ROOT" ]; then
@@ -235,7 +235,6 @@ set_locale
 set_zone
 set_keys
 prepare_drives
-update_mirrors
 install_base
 configure_system
 set_hostname
