@@ -1,0 +1,36 @@
+#######################################################################
+Author: Dylan Schacht (deadhead)
+Date: June 19, 2015
+Release: v1.0
+Discription: Script used to pull up arch wiki pages quickly from the terminal.
+Dependency: lynx OR elinks OR links
+
+
+USEAGE:
+The simplest way to use my script is to copy wiki.sh to your path. Copy the script
+to ~/bin or /usr/local/bin. 
+
+Note you will likely need sudo privelege to write to /usr/local/bin.
+ 
+Also note when copying to path don't include the .sh extension,
+this way the command you run will be wiki, not wiki.sh.
+
+example:
+sudo cp wiki.sh /usr/local/bin/wiki
+
+Once you have copied the script to your path you can simply run wiki from anywhere
+in the terminal. To search, simply enter your search following the wiki command.
+
+wiki <search args here>
+
+example:
+wiki ssh
+wiki lamp
+wiki arch build system
+
+This will pull your search from the arch wiki and display it in a terminal browser of your choice.
+
+For help run:
+wiki --help
+
+Enjoy the wiki, and keep on learning.
