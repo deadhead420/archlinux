@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "--help" == "$1" ]; then
-	this=`basename $0`
+	this=${0##*/}
 	echo
 	echo "Usage: $this archwiki page name"
 	echo
