@@ -31,6 +31,4 @@ query="$*"  # get all params into single query string
 query=${query// /_}  # substitute spaces with underscores in the query string
 
 # load ArchWiki page with automatic redirect to the correct URL:
-"$run_browser" "https://wiki.archlinux.org/index.php/Special:Search/${query}"
-
-exit $?  # return browser's exit code
+exec "$run_browser" "https://wiki.archlinux.org/index.php/Special:Search/${query}"
