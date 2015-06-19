@@ -16,9 +16,10 @@ if [ "--help" == "$1" ]; then
 fi
 
 # try to detect a console browser:
-if   [ -x /usr/bin/lynx ];   then run_browser=/usr/bin/lynx  # Lynx first because of the pretty color output
-elif [ -x /usr/bin/elinks ]; then run_browser=/usr/bin/elinks  # Elinks second because it newer fork of original Links
-elif [ -x /usr/bin/links ];  then run_browser=/usr/bin/links  # If anyone uses...
+if [ -n "$BROWSER" ];        then run_browser=$BROWSER        # Some users might have set the $BOWSER variable
+elif [ -x $(which lynx) ];   then run_browser=$(which lynx)   # Lynx first because of the pretty color output
+elif [ -x $(which elinks) ]; then run_browser=$(which elinks) # Elinks second because it newer fork of original Links
+elif [ -x $(which links) ];  then run_browser=$(which links)  # If anyone uses...
 
 else  # no console browser found -> exit
 	echo "Please install one of the following packages to use this script: elinks links lynx"
