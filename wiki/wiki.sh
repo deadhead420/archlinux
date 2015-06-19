@@ -1,5 +1,4 @@
 #!/bin/bash
-## Attempt to connect to search
 
 var=$(echo "$@" | sed 's/ /_/g')
 
