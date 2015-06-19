@@ -1,0 +1,30 @@
+#######################################################################
+Author: Dylan Schacht (deadhead)
+Date: June 19, 2015
+Release: v0.1
+Discription: Script used to pull up arch wiki pages quickly from the terminal.
+
+NOTE:
+For this script to work it requires lynx as a dependency.
+
+pacman -S lynx
+
+HOW TO USE:
+The simplest way to use my script is to copy wiki.sh to your path. Copy the script
+to ~/bin or /usr/local/bin note you will likely need sudo privelege to write 
+to /usr/local/bin. Also note when copying to path don't include the .sh filename,
+this way the command you run will be wiki, not wiki.sh.
+
+example:
+sudo cp wiki.sh /usr/local/bin/wiki
+
+Once you have copied the script to your path you can simply run wiki from anywhere
+on the command line to pull up the arch wiki. To search pass an option to your command
+
+example:
+wiki ssh
+wiki apache
+wiki grub
+
+This will pull up your search on the arch wiki and display it to you in lynx
+Enjoy this program, will update frequently.
