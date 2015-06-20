@@ -9,7 +9,7 @@ if [ "--help" == "$1" ] || [ "-h" == "$1" ]; then
 	echo
 	echo "Options:"
 	echo "  -l --language - useage: $this --language <langhere> <search args>"
-	echo"   -u --update  - useage: $this --update (fetches new script from github)"
+	echo "  -u --update  - useage: $this --update (fetches new script from github)"
 	echo
 	echo "Examples:"
 	echo "  $this ssh"
