@@ -1,0 +1,42 @@
+#!/bin/bash
+md5="51629a8f440de2b68e7cbb827e92faed  /usr/bin/arch-wiki"
+root_account() {
+if [ "$UID" -eq "0" ]; then
+	wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
+	sum=$(md5sum /usr/bin/arch-wiki) # check md5sum
+	if [ "$sum" == "$md5" ]; then # verify md5sum
+		chmod +x /usr/bin/arch-wiki # make executeable
+		echo "arch-wiki sucessfully installed!"
+		arch-wiki --help # show info
+	else
+		rm /usr/bin/arch-wiki # remove script if check sum does not match
+		echo "ERROR md5sum does not match!"
+		echo "script removed from your system, please contact repo owner ($email)"
+	fi
+else user_account
+fi
+}
+
+user_account() {
+if [ -e "/usr/bin/sudo" ]; then # check if sudo is installed
+	sudo wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
+	sum=$(md5sum /usr/bin/arch-wiki) # check md5sum
+	if [ "$sum" == "$md5" ]; then # verify md5sum
+		sudo chmod +x /usr/bin/arch-wiki # make executeable
+		echo "arch-wiki sucessfully installed!"
+		arch-wiki --help # show info
+	else
+		sudo rm /usr/bin/arch-wiki # remove script if check sum does not match
+		echo "ERROR md5sum does not match!"
+		echo "script removed from your system, please contact repo owner ($email)"
+	fi
+
+else
+	echo
+	echo "*sudo not detected* it is recommended to use sudo for administration from a user account."
+	echo
+	echo "To install arch-wiki-cli please provide the root password"
+	su -c 'wget -O - "https://www.dropbox.com/s/m0dqegjwly8ythn/installer.sh?dl=0" | sh'
+fi
+}
+root_account
