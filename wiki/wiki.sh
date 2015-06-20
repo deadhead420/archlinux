@@ -12,9 +12,8 @@ if [ "--help" == "$1" ] || [ "-h" == "$1" ]; then
 	echo
 	echo "Examples:"
 	echo "  $this ssh"
-	echo "  $this the arch way"
 	echo "  $this beginners guide"
-	echo "  $this --language Italiano bootlader"
+	echo "  $this --language Italiano the arch way"
 	echo
 	exit 0
 fi
