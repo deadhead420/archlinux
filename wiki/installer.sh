@@ -1,5 +1,5 @@
 #!/bin/bash
-md5="3d924b8e2a6e81610d2cc1de780df733  /usr/bin/arch-wiki"
+md5="9e7d3f5098ca7861d313de1e2fe3e41e  /usr/bin/arch-wiki"
 root_account() {
 if [ "$UID" -eq "0" ]; then
 	wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
