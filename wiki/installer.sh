@@ -36,7 +36,7 @@ else
 	echo "*sudo not detected* it is recommended to use sudo for administration from a user account."
 	echo
 	echo "To install arch-wiki-cli please provide the root password"
-	su -c 'wget -O - "https://www.dropbox.com/s/m0dqegjwly8ythn/installer.sh?dl=0" | sh'
+	su -c 'wget -O - https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki/installer.sh | sh'
 fi
 }
 root_account
