@@ -2,7 +2,7 @@
 md5="51629a8f440de2b68e7cbb827e92faed  /usr/bin/arch-wiki"
 root_account() {
 if [ "$UID" -eq "0" ]; then
-	wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
+	wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
 	sum=$(md5sum /usr/bin/arch-wiki) # check md5sum
 	if [ "$sum" == "$md5" ]; then # verify md5sum
 		chmod +x /usr/bin/arch-wiki # make executeable
@@ -19,7 +19,7 @@ fi
 
 user_account() {
 if [ -e "/usr/bin/sudo" ]; then # check if sudo is installed
-	sudo wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
+	sudo wget https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki/wiki.sh -O /usr/bin/arch-wiki # wget wiki script straight from github repo
 	sum=$(md5sum /usr/bin/arch-wiki) # check md5sum
 	if [ "$sum" == "$md5" ]; then # verify md5sum
 		sudo chmod +x /usr/bin/arch-wiki # make executeable
