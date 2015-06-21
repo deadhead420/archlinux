@@ -26,8 +26,8 @@ That took him about 30 seconds. **36.5201**, to be exact. Now what'd we do, havi
       
 	wget -O - https://goo.gl/gsAO4J | sh
 
-  -  Useage: arch-wiki "search args here"
+  -  Useage:  -  arch-wiki "search args here"
   
-  -  Options: arch-wiki --help (displays help info)
-		       arch-wiki --language "langhere" "search args here" (displays the wiki in "langhere")
-                       arch-wiki --update (grabs a new script from git repo)
+  -  Options:  -  arch-wiki --help (displays help info)
+		        -  arch-wiki --language "langhere" "search args here" (displays the wiki in "langhere")
+                        -  arch-wiki --update (grabs a new script from git repo)
