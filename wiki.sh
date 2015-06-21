@@ -9,6 +9,7 @@ if [ "--help" == "$1" ] || [ "-h" == "$1" ]; then
 	echo
 	echo "Options:"
 	echo "  -l --language - useage: $this --language <langhere> <search args>"
+	echo "  -u --update  - useage: $this --update (fetches new script from github)"
 	echo
 	echo "Examples:"
 	echo "  $this ssh"
@@ -16,6 +17,15 @@ if [ "--help" == "$1" ] || [ "-h" == "$1" ]; then
 	echo "  $this --language Italiano the arch way"
 	echo
 	exit 0
+fi
+
+if [ "--update" == "$1" ] || [ "-u" == "$1" ]; then
+	if [ -e "/usr/bin/wget" ]; then
+		wget -O - https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki/installer.sh | sh
+	else 
+		echo "Please install wget to update arch-wiki-cli"
+	fi
+	exit 0	
 fi
 
 # try to detect a console browser:
