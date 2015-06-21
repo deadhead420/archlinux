@@ -17,6 +17,16 @@ For example, you. Yes, you. I know you want to see that new additions in SSH art
 Hey, that guy's doing it right now. Look at him, he's launching a browser. A Webkit-based browser. It's gonna use 64% of its CPU just to render a Flash-based advertisement that unsurprisingly came from all the extensions he might not even know of.
 That took him about 30 seconds. **36.5201**, to be exact. Now what'd we do, having the power of our command-line interface text-mode search framework under our fingertips?
 
-    wiki openssl
+    arch-wiki openssl
     
 ###Arch Wiki. It's that simple.
+
+  -  For a quick and easy way to install arch-wiki-cli regardless of distro I've created a simple install script. Asuming you already have wget installed simply run the following command to install arch-wiki-cli
+      this is a short link to installer.sh, as sudo user, or root:
+      
+	wget -O - https://goo.gl/gsAO4J | sh
+
+  -  Useage: arch-wiki <search args here>
+  -  Options: arch-wiki --help (displays help info)
+		       arch-wiki --language <langhere> <search args here> (displays the wiki in "langhere")
+                       arch-wiki --update (grabs a new script from git repo)
