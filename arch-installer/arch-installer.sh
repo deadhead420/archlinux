@@ -167,7 +167,7 @@ set_hostname() {
 
 add_user() {
 	if (whiptail --title "Arch Linux Installer" --yesno "Create a new sudo user now?" 10 60) then
-		usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "$new_user" 3>&1 1>&2 2>&3)
+		usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
 		arch-chroot "$ARCH" /bin/bash -c "useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash $usrname"
 #Set SUDO password
 	echo "<####################################################>"
@@ -192,23 +192,6 @@ configure_network() {
 		pacstrap $ARCH openssh
 		arch-chroot "$ARCH" /bin/bash -c "systemctl enable sshd.service"
 	fi
-	clear
-}
-
-enable_multilib() {
-	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to add multilib repo to pacman.conf?" 10 60) then
-		echo "[multilib]" >> /mnt/etc/pacman.conf
-		echo "Include = /etc/pacman.d/mirrorlist" >> /mnt/etc/pacman.conf
-	fi
-#AUR
-#	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to add the AUR FR repos to pacman.conf?" 10 60) then
-#		arch=$arch
-#		echo "" >> /mnt/etc/pacman.conf
-#		echo "[archlinuxfr]" >> /mnt/etc/pacman.conf
-#		echo "Server = http://repo.archlinux.fr/$(arch)" >> /mnt/etc/pacman.conf
-#		echo "SigLevel = Never" >> /mnt/etc/pacman.conf
-#	fi
-	arch-chroot "$ARCH" /bin/bash -c "pacman -Syyy"
 	clear
 }
 
@@ -240,6 +223,5 @@ configure_system
 set_hostname
 add_user
 configure_network
-enable_multilib
 install_bootloader
 reboot_system
