@@ -32,9 +32,7 @@ while [ "$played_percent" -gt "0" ]
 init
 }
 download() {
-ARTIST=$(echo $artist | sed 's/ /+/g')
-ALBUM=$(echo $album | sed 's/ /+/g')
-SEARCH="$ARTIST+$ALBUM"
+SEARCH=$(echo "$artist+$album" | sed 's/ /+/g')
 cover_url=$(lynx --dump http://www.covermytunes.com/search.php\?search_query\=$SEARCH\&x\=0\&y\=0 | grep -F "2. http://www.covermytunes.com/cd-cover" | cut -c7-)
 if [ -n "$cover_url" ]; then
 	image_url=$(lynx -image_links -dump $cover_url | grep -a "600x600" | awk 'NR==2' | cut -c7-)
