@@ -18,7 +18,7 @@ fi
 hold() {
 cover=$(md5sum ~/.covers/"$now_playing" | awk '{print $1}')
 current_cover=$(md5sum cover.jpg | awk '{print $1}')
-if [ "$cover" == "$current_cover" ]; then
+if [ "$cover" == "$current_cover" ] || [ "$current_cover" == "034bf031009499ef5e93cbd68c3ce06f" ]; then
 	sleep 2
 else
 	init
