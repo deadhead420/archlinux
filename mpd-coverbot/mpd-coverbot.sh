@@ -18,6 +18,7 @@ if [ -d "$download_dir" ]; then
 else
 	echo "Error the download directory '$download_dir' does not exist"
 	echo "Please create '$download_dir' and try running again"
+	exit 1
 fi
 init() {
 state=$(mpc status | awk 'NR==2' | awk '{print $1}')				# checks is music is playing
