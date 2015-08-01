@@ -8,9 +8,8 @@
 ## Album covers are saved to ~/.covers/ ensure this directory exists, or change the "download_dir" variable at the top of this script to the directory of your choice.
 ## This script also relies on the proper artist and album tags being set for each song playing or it will not return any results.
 ## Feel free to use this script in any way you would like and make any changes you would like.
-## To submit your changes or suggest any ideas see my github:
+## To submit your changes or suggest any ideas see my github: https://github.com/deadhead420/archlinux/blob/master/mpd-coverbot/mpd-coverbot.sh
 ##
-
 
 # change this variable to specify the directory you would like the covers to be downloaded to
 # set to full directory path, default path set to ~/.covers
