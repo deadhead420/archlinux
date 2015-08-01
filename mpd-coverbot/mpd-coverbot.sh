@@ -11,10 +11,14 @@
 ## To submit your changes or suggest any ideas see my github:
 ##
 
-download_dir=~/.covers			# change this variable to specify the directory you would like the covers to be downloaded to
-									# set to full directory path, default path set to ~/.covers
+
+# change this variable to specify the directory you would like the covers to be downloaded to
+# set to full directory path, default path set to ~/.covers
+download_dir=~/.covers
+
+
 if [ -d "$download_dir" ]; then
-		init
+	init
 else
 	echo "Error the download directory '$download_dir' does not exist"
 	echo "Please create '$download_dir' and try running again"
