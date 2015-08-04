@@ -48,11 +48,6 @@ set_keys() {
 }
 
 prepare_drives() {
-	if [ "$drive_partitoned" == "true"
-		if ! (whiptail --title "Arch Linux Installer" --yesno "/dev/$DRIVE has already been partitioned. \n Continue and repartition drive?" 10 60) then
-			update_mirrors
-		fi
-	else
 		drive="$(lsblk | grep "disk" | grep -v "rom" | awk '{print $1 "                          " $4}')"
 		DRIVE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select the drive to install arch onto:" 15 60 5 $drive 3>&1 1>&2 2>&3)
 		if (whiptail --title "Arch Linux Installer" --yesno "WARNING! Will erase all data on /dev/$DRIVE Continue?" 10 60) then
@@ -134,8 +129,6 @@ prepare_drives() {
 		 		fi
 			;;
 		esac
-	fi
-	drive_partitioned=true
 }
 
 update_mirrors() {
