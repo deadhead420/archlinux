@@ -176,7 +176,7 @@ install_base() {
 
 configure_system() {
 	if [ "$INSTALLED" == "true" ]; then
-		if [ "$system_configured" == "true"]; then
+		if [ "$system_configured" == "true" ]; then
 			set_hostname
 		else
 			sed -i -e "s/#$LOCALE/$LOCALE/" "$ARCH"/etc/locale.gen
@@ -287,6 +287,7 @@ reboot_system() {
 				umount -R $ARCH/boot
 				umount -R $ARCH
 				reboot
+	fi
 }
 
 main_menu() {
