@@ -24,60 +24,60 @@ else
 	exit 1
 fi
 init() {
-state=$(mpc status | awk 'NR==2' | awk '{print $1}')			# checks is music is playing
-if [ "$state" == "[playing]" ]; then			# defines variables if music is playing
-	artist=$(mpc -f %artist% | awk 'NR==1' | sed 's!/! !g;s/&/ /g')
-	album=$(mpc -f %album% | awk 'NR==1' | sed 's/disk 1//;s/disk 2//;s/disk 3//;s/disk 4//;s/Disk 1//;s/Disk 2//;s/Disk 3//;s/Disk 4//;s/disc 1//;s/disc 2//;s/disc 3//;s/disc 4//;s/Disc 1//;s/Disc 2//;s/Disc 3//;s/Disc 4//;s!1/2!!;s!2/2!!;s/]//;s/\[//;s/)//;s/(//;s!/! !g;s/&/+/g')
-	now_playing="$artist-$album.jpg"			# uses artist and album tags to specify an image file
-	if [ -f "$download_dir"/"$now_playing" ]; then			# checks if that image exists under cover directory
-		hold			# holds if image exists
+state=$(mpc status | awk 'NR==2' | awk '{print $1}')	
+if [ "$state" == "[playing]" ]; then
+	artist=$(mpc -f %artist% | awk 'NR==1' | sed 's/[/\,.;:%$!#^@*{}<>]//g;s/&/ /g' | tr -s " ")
+	album=$(mpc -f %album% | awk 'NR==1' | sed -e 's/\[[^][]*\]\|([^()]*)\|[/\,.;:%$!#^@&*{}<>]\|disk.*\|disc.*\|1\/2\|2\/2//gi' | tr -s " ")
+	now_playing="$artist-$album.jpg"
+	if [ -f "$download_dir"/"$now_playing" ]; then
+		hold
 	else
-		download			# if image does not exist download
+		download
 	fi
 else
-	hold			# hold when not playing
+	hold
 fi
 }
 hold() {
 played_percent=$(mpc status | awk 'NR==2' | awk '{print $4}' | sed 's/(\|)\|%//g')
 while [[ "$played_percent" -gt "0" && "$state" == "[playing]"  ]]
-	do			# checks played percent and state of mpd
+	do
 		played_percent=$(mpc status | awk 'NR==2' | awk '{print $4}' | sed 's/(\|)\|%//g')
 		state=$(mpc status | awk 'NR==2' | awk '{print $1}')
-		sleep 1		# sleeps for 1 second while played percent is greater than 0
+		sleep 1
 	done
 while [ "$state" == "[paused]" ]
 	do
 		state=$(mpc status | awk 'NR==2' | awk '{print $1}')
-		sleep 2		# sleeps for 2 seconds while state is paused
+		sleep 2
 	done
 while [ ! "$state" ] 
 	do
 		state=$(mpc status | awk 'NR==2' | awk '{print $1}')
-		sleep 4		# sleeps for 4 seconds while state is not defined
+		sleep 4
 	done
-init		# back to initial function when hold phase is no longer true
+init
 }
 download() {
-SEARCH=$(echo "$artist+$album" | sed "s/ /+/g;s!/!!g;s/'//g")			# prepares a search querry 
+SEARCH=$(echo "$artist+$album" | sed "s/ /+/g;s!/!!g;s/'//g")
 cover_url=$(lynx --dump http://www.covermytunes.com/search.php\?search_query\=$SEARCH\&x\=0\&y\=0 | grep -a "2. http://www.covermytunes.com/cd-cover" | cut -c7- | awk 'NR==1')
-if [ -n "$cover_url" ]; then			# if search querry returns a result searches page for correct size image
+if [ -n "$cover_url" ]; then
 	image_url=$(lynx -image_links -dump $cover_url | grep -a "600x600" | cut -c7-)
 	test_url=$(echo "$image_url" | wc -l)
-	if [ "$test_url" -gt 1 ]; then		# tests image url to ensure correct link is downloaded
+	if [ "$test_url" -gt 1 ]; then
 		download_url=$(echo "$image_url" | awk "NR==2")
 	else
 		download_url=$(echo "$image_url")
 	fi
-	if [ -n "$download_url" ]; then		# if a download url exists wget the image and save to cover directory as artist-album.jpg
+	if [ -n "$download_url" ]; then
 		wget "$download_url" -O "$download_dir"/"$now_playing"
 	else
-		google_cover			# if no link is found attempt a google search
+		google_cover
 	fi
 else
 	google_cover
 fi
-init		# once finished return to initial function
+init
 }
 google_cover() {
 cover_url=$(lynx -dump 'https://www.google.com/search?q='$SEARCH'&biw=1600&bih=789&tbm=isch&source=lnt&tbs=isz:ex,iszw:600,iszh:600' | grep -a "http://www.google.com/imgres?imgurl=" | awk "NR==1" | cut -c7-)
