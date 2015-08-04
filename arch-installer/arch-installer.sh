@@ -283,10 +283,10 @@ install_bootloader() {
 }
 
 reboot_system() {
-			if (whiptail --title "Arch Linux Installer" --yesno "Install process complete! Reboot now?" 10 60) then
-				umount -R $ARCH/boot
-				umount -R $ARCH
-				reboot
+	if (whiptail --title "Arch Linux Installer" --yesno "Install process complete! Reboot now?" 10 60) then
+		umount -R "$ARCH"/boot
+		umount -R $ARCH
+		reboot
 	fi
 }
 
