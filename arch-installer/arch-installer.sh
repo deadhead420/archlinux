@@ -283,22 +283,10 @@ install_bootloader() {
 }
 
 reboot_system() {
-	if [ "$INSTALLED" == "true" ]; then
-		if [ "$bootloader_installed" == "true" ]; then
 			if (whiptail --title "Arch Linux Installer" --yesno "Install process complete! Reboot now?" 10 60) then
 				umount -R $ARCH/boot
 				umount -R $ARCH
 				reboot
-			else
-				exit
-		else
-			whiptail --title "Test Message Box" --msgbox "Error no bootloader installed \n Continuing to menu." 10 60
-			main_menu
-		fi
-	else
-		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at "$ARCH" \n Continuing to menu." 10 60
-		main_menu
-	fi
 }
 
 main_menu() {
