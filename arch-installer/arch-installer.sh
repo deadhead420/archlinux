@@ -156,7 +156,7 @@ install_base() {
 			fi
 		fi
 	else
-		if [ "$INSTALLED" == "true"
+		if [ "$INSTALLED" == "true" ]; then
 			if (whiptail --title "Arch Linux Installer" --yesno "Error root filesystem already installed at $ARCH. \n Begin configuring system?" 10 60) then
 				configure_system
 			else
