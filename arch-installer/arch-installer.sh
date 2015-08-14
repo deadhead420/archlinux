@@ -6,6 +6,8 @@ BluBG=$'\e[44m';
 echo -e ${BluBG}
 
 set_locale() {
+	clear
+	echo -e ${BluBG}
 	LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your locale" 15 60 5 \
 	"en_US.UTF-8" "-" \
 	"en_AU.UTF-8" "-" \
@@ -16,7 +18,6 @@ set_locale() {
 		localelist=$(</etc/locale.gen  awk '{print substr ($1,2) " " ($2);}' | grep -F ".UTF-8" | sed "1d" | sed 's/$/  -/g;s/ UTF-8//g')
 		LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your desired locale:" 15 60 5  $localelist 3>&1 1>&2 2>&3)
 	fi
-	clear
 	locale_set=true
 	set_zone
 }
@@ -75,8 +76,8 @@ prepare_drives() {
 					BOOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==2) print substr ($1,3) }')"
 					SWAP="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==5) print substr ($1,3) }')"
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
-					clear
 					echo -e ${BluBG}
+					clear
 					wipefs -a /dev/"$BOOT"
 					mkfs.ext4 /dev/"$BOOT"
 					wipefs -a /dev/"$ROOT"
@@ -94,8 +95,8 @@ prepare_drives() {
 					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE"
 					BOOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==2) print substr ($1,3) }')"
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
-					clear
 					echo -e ${BluBG}
+					clear
 					wipefs -a /dev/"$BOOT"
 					mkfs.ext4 /dev/"$BOOT"
 					wipefs -a /dev/"$ROOT"
@@ -119,10 +120,10 @@ prepare_drives() {
 					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a -q /dev/"$ROOT"
 					mkfs.ext4 -q /dev/"$ROOT"
-			                wipefs -a -q /dev/"$SWAP"
+			        wipefs -a -q /dev/"$SWAP"
 					mkswap /dev/"$SWAP"
 					swapon /dev/"$SWAP"
-		                        mount /dev/"$ROOT" "$ARCH"
+		            mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
 						mounted=true
 					fi
