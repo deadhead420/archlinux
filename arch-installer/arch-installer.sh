@@ -46,8 +46,8 @@ prepare_drives() {
 	drive=$(lsblk | grep "disk" | grep -v "rom" | awk '{print $1"      "$4}')
 	DRIVE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select the drive you would like to install arch onto:" 15 60 5 $drive 3>&1 1>&2 2>&3)
 	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 4 \
-	"Auto Partition Drive"          ">" \
-	"Manual Partition Drive"        ">" 3>&1 1>&2 2>&3)
+	"Auto Partition Drive"          "-" \
+	"Manual Partition Drive"        "-" 3>&1 1>&2 2>&3)
 
 	case "$PART" in
 		"Auto Partition Drive")
@@ -152,7 +152,7 @@ prepare_drives() {
 																							"parted"  "GNU Parted" 3>&1 1>&2 2>&3)
 			$part_tool /dev/"$DRIVE"
 			if [ "$?" -gt "0" ]; then
-				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning\nReturing to menu please try again" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing to menu please try again" 10 60
 				main_menu
 			fi
 			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
@@ -373,19 +373,19 @@ reboot_system() {
 
 main_menu() {
 	menu_item=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Menu Items:" 15 60 5 \
-		"Set Locale"          ">" \
-		"Set Timezone"        ">" \
-		"Set Keymap"          ">" \
-		"Partition Drive"     ">" \
-		"Update Mirrors"      ">" \
-		"Install Base System" ">" \
-		"Configure System"    ">" \
-		"Set Hostname"        ">" \
-		"Add User"            ">" \
-		"Configure Network"   ">" \
-		"Install Bootloader"  ">" \
-		"Reboot System"       ">" \
-		"Exit Installer"      ">" 3>&1 1>&2 2>&3)
+		"Set Locale"          "-" \
+		"Set Timezone"        "-" \
+		"Set Keymap"          "-" \
+		"Partition Drive"     "-" \
+		"Update Mirrors"      "-" \
+		"Install Base System" "-" \
+		"Configure System"    "-" \
+		"Set Hostname"        "-" \
+		"Add User"            "-" \
+		"Configure Network"   "-" \
+		"Install Bootloader"  "-" \
+		"Reboot System"       "-" \
+		"Exit Installer"      "-" 3>&1 1>&2 2>&3)
 	case "$menu_item" in
 		"Set Locale" ) 
 			if [ "$locale_set" == "true" ]; then
