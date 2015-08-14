@@ -165,7 +165,7 @@ prepare_drives() {
 				mounted=true
 			fi
 			new_mnt=Begin
-			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >\nOther   >\nSWAP   >")
+			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >\nOther   >")
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
@@ -358,7 +358,7 @@ reboot_system() {
 			umount -R $ARCH
 			reboot
 		else
-			whiptail --title "Arch Linux Installer" --msgbox "System installed\nExiting arch installer" 10 60
+			whiptail --title "Arch Linux Installer" --msgbox "System fully installed \n Exiting arch installer" 10 60
 			exit
 		fi
 	else
@@ -410,7 +410,7 @@ main_menu() {
 		;;
 		"Partition Drive")
 			if [ "$mounted" == "true" ]; then
-				whiptail --title "Arch Linux Installer" --msgbox "Drive already mounted, try install base system\n returning to menu" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "Drive already mounted, try install base system \n returning to menu" 10 60
 				main_menu
 			fi	
  			prepare_drives
@@ -424,11 +424,11 @@ main_menu() {
 				if [ "$system_configured" != "true" ]; then
 					configure_system
 				else
-					whiptail --title "Arch Linux Installer" --msgbox "System already configured\n returning to menu" 10 60
+					whiptail --title "Arch Linux Installer" --msgbox "System already configured \n returning to menu" 10 60
 					main_menu
 				fi
 			else
-				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet\n returning to menu" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet \n returning to menu" 10 60
 				main_menu
 			fi
 		;;
@@ -436,7 +436,7 @@ main_menu() {
 			if [ "$INSTALLED" == "true" ]; then
 				set_hostname
 			else
-				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet\n returning to menu" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet \n returning to menu" 10 60
 				main_menu
 			fi
 		;;
@@ -444,7 +444,7 @@ main_menu() {
 			if [ "$INSTALLED" == "true" ]; then
 				add_user
 			else
-				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet\n returning to menu" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet \n returning to menu" 10 60
 				main_menu
 			fi
 		;;
@@ -452,7 +452,7 @@ main_menu() {
 			if [ "$INSTALLED" == "true" ]; then
 				configure_network
 			else
-				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet\n returning to menu" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet \n returning to menu" 10 60
 				main_menu
 			fi
 		;;
@@ -460,7 +460,7 @@ main_menu() {
 			if [ "$INSTALLED" == "true" ]; then
 				install_bootloader
 			else
-				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet\n returning to menu" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet \n returning to menu" 10 60
 				main_menu
 			fi
 		;;
@@ -469,10 +469,10 @@ main_menu() {
 		;;
 		"Exit Installer")
 			if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
-				whiptail --title "Arch Linux Installer" --msgbox "System installed\nExiting arch installer" 10 60
+				whiptail --title "Arch Linux Installer" --msgbox "System fully installed \n Exiting arch installer" 10 60
 				exit
 			else
-				if (whiptail --title "Arch Linux Installer" --yesno "System not installed yet/nAre you sure you want to exit?" 10 60) then
+				if (whiptail --title "Arch Linux Installer" --yesno "System not installed yet \n Are you sure you want to exit?" 10 60) then
 					exit
 				else
 					main_menu
