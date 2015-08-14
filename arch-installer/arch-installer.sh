@@ -7,11 +7,11 @@ echo -e ${BluBG}
 
 set_locale() {
 	LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your locale" 15 60 5 \
-	"en_US.UTF-8" ">" \
-	"en_AU.UTF-8" ">" \
-	"en_CA.UTF-8" ">" \
-	"en_GB.UTF-8" ">" \
-	"Other"       ">"		 3>&1 1>&2 2>&3)
+	"en_US.UTF-8" "-" \
+	"en_AU.UTF-8" "-" \
+	"en_CA.UTF-8" "-" \
+	"en_GB.UTF-8" "-" \
+	"Other"       "-"		 3>&1 1>&2 2>&3)
 
 	if [ "$LOCALE" = "Other" ]; then
 		localelist=$(cat /etc/locale.gen | awk '{print $1}' | awk '{print substr ($1,2) " " ($2);}' | grep "UTF-8\|ISO" | sed "1d" | sed 's/$/  -/g')
@@ -171,7 +171,7 @@ prepare_drives() {
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
 					new_mnt=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select another partition to create a mount point [OR swap]:\nSelect done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
-						MNT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)
+						MNT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 10 $points 3>&1 1>&2 2>&3)
 						if [ "$MNT" == "Other" ]; then
 							MNT=$(whiptail --nocancel --inputbox "Enter your desired mount point:/nNOTE this must be the full path" 10 40 "/path" 3>&1 1>&2 2>&3)
 						fi
@@ -251,6 +251,7 @@ configure_system() {
 			sed -i -e "s/#$LOCALE/$LOCALE/" "$ARCH"/etc/locale.gen
 			echo LANG="$LOCALE" > "$ARCH"/etc/locale.conf
 			arch-chroot "$ARCH" locale-gen
+			arch-chroot "$ARCH" loadkeys "$keyboard"
 			if [ -n "$SUB_SUBZONE" ]; then
 				arch-chroot "$ARCH" ln -s /usr/share/zoneinfo/"$ZONE"/"$SUBZONE"/"$SUB_SUBZONE" /etc/localtime
 			elif [ -n "$SUBZONE" ]; then
