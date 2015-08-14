@@ -198,6 +198,7 @@ update_mirrors() {
 		code=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select your country code:" 15 60 5 $countries 3>&1 1>&2 2>&3)
 		wget "https://www.archlinux.org/mirrorlist/?country=$code&protocol=http" -O /etc/pacman.d/mirrorlist 
   		sed -i 's/#//' /etc/pacman.d/mirrorlist
+  		mirrors_updated=true
 	fi
 	clear
 }
@@ -268,6 +269,7 @@ configure_system() {
 			if (whiptail --title "Arch Linux Installer" --yesno "Would you like to add archlinuxfr to your pacman.conf?" 10 60) then
 				echo -e "[archlinuxfr]\nServer = http://repo.archlinux.fr/\$arch\nSigLevel = Never" >> /mnt/etc/pacman.conf
 			fi
+			system_configured=true
 			clear
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
@@ -276,29 +278,39 @@ configure_system() {
 }
 
 set_hostname() {
-			hostname=$(whiptail --nocancel --inputbox "Set hostname:" 10 40 "arch" 3>&1 1>&2 2>&3)
-			echo "$hostname" > "$ARCH"/etc/hostname
+	if [ "$INSTALLED" == "true" ]; then
+		hostname=$(whiptail --nocancel --inputbox "Set hostname:" 10 40 "arch" 3>&1 1>&2 2>&3)
+		echo "$hostname" > "$ARCH"/etc/hostname
 		#Set ROOT password
-			echo "<####################################################>"
-			echo "Please enter the root password: "
-			arch-chroot "$ARCH" passwd
-			clear
+		echo "<####################################################>"
+		echo "Please enter the root password: "
+		arch-chroot "$ARCH" passwd
+		clear
+	else
+		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
+		main_menu
+	fi
 }
 
 add_user() {
-			if (whiptail --title "Arch Linux Installer" --yesno "Create a new sudo user now?" 10 60) then
-				usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
-			else
-				configure_network
-			fi
-			arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$usrname"
-			echo "<####################################################>"
-			echo "Please enter the sudo password for $usrname: "
-			arch-chroot "$ARCH" passwd "$usrname"
-			clear
-			if (whiptail --title "Arch Linux Installer" --yesno "Enable sudo privelege for members of wheel?" 10 60) then
-				sed -i '/%wheel ALL=(ALL) ALL/s/^#//' $ARCH/etc/sudoers
-			fi
+	if [ "$INSTALLED" == "true" ]; then
+		if (whiptail --title "Arch Linux Installer" --yesno "Create a new sudo user now?" 10 60) then
+			usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
+		else
+			configure_network
+		fi
+		arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$usrname"
+		echo "<####################################################>"
+		echo "Please enter the sudo password for $usrname: "
+		arch-chroot "$ARCH" passwd "$usrname"
+		clear
+		if (whiptail --title "Arch Linux Installer" --yesno "Enable sudo privelege for members of wheel?" 10 60) then
+			sed -i '/%wheel ALL=(ALL) ALL/s/^#//' $ARCH/etc/sudoers
+		fi
+	else
+		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
+		main_menu
+	fi
 }
 
 configure_network() {
@@ -341,26 +353,39 @@ install_bootloader() {
 }
 
 reboot_system() {
-	if (whiptail --title "Arch Linux Installer" --yesno "Install process complete! Reboot now?" 10 60) then
-		umount -R $ARCH
-		reboot
+	if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then	
+		if (whiptail --title "Arch Linux Installer" --yesno "Install process complete! Reboot now?" 10 60) then
+			umount -R $ARCH
+			reboot
+		else
+			whiptail --title "Arch Linux Installer" --msgbox "System installed\nExiting arch installer" 10 60
+			exit
+		fi
+	else
+		if (whiptail --title "Arch Linux Installer" --yesno "Install not complete, are you sure you want to reboot?" 10 60) then
+			umount -R $ARCH
+			reboot
+		else
+			main_menu
+		fi
 	fi
 }
 
 main_menu() {
 	menu_item=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Menu Items:" 15 60 5 \
-		"Set Locale" ">" \
-		"Set Timezone" ">" \
-		"Set Keymap" ">" \
-		"Partition Drive" ">" \
-		"Update Mirrors" ">" \
+		"Set Locale"          ">" \
+		"Set Timezone"        ">" \
+		"Set Keymap"          ">" \
+		"Partition Drive"     ">" \
+		"Update Mirrors"      ">" \
 		"Install Base System" ">" \
-		"Configure System" ">" \
-		"Set Hostname" ">" \
-		"Add User" ">" \
-		"Configure Network" ">" \
-		"Install Bootloader" ">" \
-		"Reboot System"       ">"		 3>&1 1>&2 2>&3)
+		"Configure System"    ">" \
+		"Set Hostname"        ">" \
+		"Add User"            ">" \
+		"Configure Network"   ">" \
+		"Install Bootloader"  ">" \
+		"Reboot System"       ">" \
+		"Exit Installer"      ">" 3>&1 1>&2 2>&3)
 	case "$menu_item" in
 		"Set Locale" ) 
 			if [ "$locale_set" == "true" ]; then
@@ -396,7 +421,12 @@ main_menu() {
 		;;
 		"Configure System")
 			if [ "$INSTALLED" == "true" ]; then
-				configure_system
+				if [ "$system_configured" != "true" ]; then
+					configure_system
+				else
+					whiptail --title "Arch Linux Installer" --msgbox "System already configured\n returning to menu" 10 60
+					main_menu
+				fi
 			else
 				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet\n returning to menu" 10 60
 				main_menu
@@ -435,11 +465,15 @@ main_menu() {
 			fi
 		;;
 		"Reboot System")
+			reboot_system
+		;;
+		"Exit Installer")
 			if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
-				reboot_system
+				whiptail --title "Arch Linux Installer" --msgbox "System installed\nExiting arch installer" 10 60
+				exit
 			else
-				if (whiptail --title "Arch Linux Installer" --yesno "System not installed yet/nAre you sure you want to reboot?" 10 60) then
-					reboot_system
+				if (whiptail --title "Arch Linux Installer" --yesno "System not installed yet/nAre you sure you want to exit?" 10 60) then
+					exit
 				else
 					main_menu
 				fi
