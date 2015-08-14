@@ -50,25 +50,25 @@ prepare_drives() {
 	DRIVE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select the drive you would like to install arch onto:" 15 60 5 $drive 3>&1 1>&2 2>&3)
 	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 4 \
 	"Auto Partition Drive"          "-" \
-	"Manual Partition Drive"        "-" 3>&1 1>&2 2>&3)
+	"Manual Partition Drive"        "-" \
+	"Return To Menu"                "-" 3>&1 1>&2 2>&3)
 
 	case "$PART" in
 		"Auto Partition Drive")
-			if (whiptail --title "Arch Linux Installer" --yesno "WARNING! Will erase all data on /dev/$DRIVE Continue?" 10 60) then
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n Would you like to contunue? \n Select yes to continue" 10 60) then
 				wipefs -a /dev/"$DRIVE"
 			else
-				main_menu
+				prepare_drive
 			fi
 			SWAP=false
 			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 15 60) then
 				SWAP=true
-				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size(Align to M or G):" 10 30 "512M" 3>&1 1>&2 2>&3)
+				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 10 30 "512M" 3>&1 1>&2 2>&3)
 			fi				
 			GPT=false
 			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to use GPT partitioning?" 15 60) then
 				GPT=true
 			fi
-
 			if "$GPT" ; then
 				if "$SWAP" ; then
 					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n4\n\n+$SWAPSPACE\n8200\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE"
@@ -194,6 +194,14 @@ prepare_drives() {
 						fi
 					fi
 				done
+		;;
+		"Return To Menu")
+			if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you want to return to menu?" 10 60) then
+				main_menu
+			else
+				prepare_drives
+
+			fi
 		;;
 	esac
 	if [ "$mounted" != "true" ]; then
