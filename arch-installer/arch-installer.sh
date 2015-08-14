@@ -21,6 +21,7 @@ set_locale() {
 	fi
 	clear
 	locale_set=true
+	set_zone
 }
 
 set_zone() {
@@ -40,12 +41,14 @@ set_zone() {
 			fi
 		fi
 	zone_set=true
+	set_keys
 }
 
 set_keys() {
 	keyboard=$(whiptail --nocancel --inputbox "Set key-map:" 10 30 "us" 3>&1 1>&2 2>&3)
 	loadkeys "$keyboard"
 	keys_set=true
+	prepare_drives
 }
 
 prepare_drives() {
@@ -202,6 +205,11 @@ prepare_drives() {
 				done
 		;;
 	esac
+	if [ "$mounted" != "true" ]; then
+		whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing to drive partitioning" 10 60
+		prepare_drives
+	fi
+	update_mirrors
 }
 
 update_mirrors() {
@@ -213,6 +221,7 @@ update_mirrors() {
   		mirrors_updated=true
 	fi
 	clear
+	install_base
 }
 
 install_base() {
@@ -232,6 +241,7 @@ install_base() {
 			if [ -n "$intel" ]; then
 				pacstrap $ARCH intel-ucode
 			fi
+			configure_system
 		else
 			if (whiptail --title "Arch Linux Installer" --yesno "Ready to install system to $ARCH \n Are you sure you want to exit to menu?" 10 60) then
 				main_menu
@@ -284,6 +294,7 @@ configure_system() {
 			fi
 			system_configured=true
 			clear
+			set_hostname
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
 		main_menu
@@ -299,6 +310,7 @@ set_hostname() {
 		echo "Please enter the root password: "
 		arch-chroot "$ARCH" passwd
 		clear
+		add_user
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
 		main_menu
@@ -320,6 +332,7 @@ add_user() {
 		if (whiptail --title "Arch Linux Installer" --yesno "Enable sudo privelege for members of wheel?" 10 60) then
 			sed -i '/%wheel ALL=(ALL) ALL/s/^#//' $ARCH/etc/sudoers
 		fi
+		configure_network
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
 		main_menu
@@ -339,6 +352,7 @@ configure_network() {
 				arch-chroot "$ARCH" systemctl enable sshd.service
 			fi
 			clear
+			install_bootloader
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
 		main_menu
@@ -358,6 +372,7 @@ install_bootloader() {
 				fi
 				arch-chroot "$ARCH" grub-mkconfig -o /boot/grub/grub.cfg
 				clear
+				reboot_system
 			fi
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
@@ -496,14 +511,3 @@ main_menu() {
 }
 
 set_locale
-set_zone
-set_keys
-prepare_drives
-update_mirrors
-install_base
-configure_system
-set_hostname
-add_user
-configure_network
-install_bootloader
-reboot_system
