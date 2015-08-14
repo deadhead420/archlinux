@@ -58,7 +58,7 @@ prepare_drives() {
 			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n Would you like to contunue? \n Select yes to continue" 10 60) then
 				wipefs -a /dev/"$DRIVE"
 			else
-				prepare_drive
+				prepare_drives
 			fi
 			SWAP=false
 			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 15 60) then
