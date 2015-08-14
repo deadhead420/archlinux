@@ -12,7 +12,6 @@ set_locale() {
 	"en_CA.UTF-8" "-" \
 	"en_GB.UTF-8" "-" \
 	"Other"       "-"		 3>&1 1>&2 2>&3)
-
 	if [ "$LOCALE" = "Other" ]; then
 		localelist=$(cat /etc/locale.gen | awk '{print $1}' | awk '{print substr ($1,2) " " ($2);}' | grep "UTF-8\|ISO" | sed "1d" | sed 's/$/  -/g')
 		LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your desired locale:" 15 60 5 $localelist 3>&1 1>&2 2>&3)
