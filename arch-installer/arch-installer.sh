@@ -353,6 +353,9 @@ configure_network() {
 install_bootloader() {
 	if [ "$INSTALLED" == "true" ]; then
 			if (whiptail --title "Arch Linux Installer" --yesno "Install GRUB onto /dev/$DRIVE?" 10 60) then
+				if (whiptail --title "Arch Linux Installer" --yesno "Install os-prober first \n Required to dualboot with windows or mac OSX" 10 60) then
+					pacstrap "$ARCH" os-prober
+				fi
 				pacstrap "$ARCH" grub-bios
 				arch-chroot "$ARCH" grub-install --recheck /dev/"$DRIVE"
 				if [ "$?" -eq "0" ]; then
