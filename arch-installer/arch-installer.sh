@@ -48,7 +48,7 @@ set_zone() {
 }
 
 set_keys() {
-	keyboard=$(whiptail --nocancel --inputbox "Set key-map: \n If unsure leave default" 15 30 "us" 3>&1 1>&2 2>&3)
+	keyboard=$(whiptail --nocancel --inputbox "Set key-map: \n If unsure leave default" 10 35 "us" 3>&1 1>&2 2>&3)
 	loadkeys "$keyboard"
 	keys_set=true
 	prepare_drives
@@ -72,7 +72,7 @@ prepare_drives() {
 			SWAP=false
 			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 15 60) then
 				SWAP=true
-				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 15 30 "512M" 3>&1 1>&2 2>&3)
+				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 10 35 "512M" 3>&1 1>&2 2>&3)
 			fi				
 			GPT=false
 			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to use GPT partitioning?" 15 60) then
@@ -225,7 +225,7 @@ update_mirrors() {
 	countries=$(echo -e "AT Austria\n AU  Australia\n BE Belgium\n BG Bulgaria\n BR Brazil\n BY Belarus\n CA Canada\n CL Chile \n CN China\n CO Columbia\n CZ Czech-Republic\n DK Denmark\n EE Estonia\n ES Spain\n FI Finland\n FR France\n GB United-Kingdom\n HU Hungary\n IE Ireland\n IL Isreal\n IN India\n IT Italy\n JP Japan\n KR Korea\n KZ Kazakhstan\n LK Sri-Lanka\n LU Luxembourg\n LV Lativia\n MK Macedonia\n NC New-Caledonia\n NL Netherlands\n NO Norway\n NZ New-Zealand\n PL Poland\n PT Portugal\n RO Romania\n RS Serbia\n RU Russia\n SE Sweden\n SG Singapore\n SK Slovakia\n TR Turkey\n TW Taiwan\n UA Ukraine\n US United-States\n UZ Uzbekistan\n VN Viet-Nam\n ZA South-Africa")
 	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to update your mirrorlist now?" 10 60) then
 		code=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select your country code:" 15 60 5 $countries 3>&1 1>&2 2>&3)
-		wget "https://www.archlinux.org/mirrorlist/?country=$code&protocol=http" -O /etc/pacman.d/mirrorlist 
+		wget --append-output=/dev/null "https://www.archlinux.org/mirrorlist/?country=$code&protocol=http" -O /etc/pacman.d/mirrorlist 
   		sed -i 's/#//' /etc/pacman.d/mirrorlist
   		mirrors_updated=true
 	fi
