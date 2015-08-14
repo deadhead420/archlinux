@@ -14,10 +14,7 @@ set_locale() {
 	"Other"       "-"		 3>&1 1>&2 2>&3)
 	if [ "$LOCALE" = "Other" ]; then
 		localelist=$(</etc/locale.gen  awk '{print substr ($1,2) " " ($2);}' | grep -F ".UTF-8" | sed "1d" | sed 's/$/  -/g;s/ UTF-8//g')
-		LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your desired locale:" 15 60 5 "<Back" "-" $localelist "<Back" "-" 3>&1 1>&2 2>&3)
-		if [ "$LOCALE" == "<Back" ]; then
-			set_locale
-		fi
+		LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your desired locale:" 15 60 5  $localelist 3>&1 1>&2 2>&3)
 	fi
 	clear
 	locale_set=true
@@ -25,15 +22,12 @@ set_locale() {
 }
 
 set_zone() {
-	zonelist=$(find /usr/share/zoneinfo -maxdepth 1 | sed -n -e 's!^.*/!!p' | grep -v "posix\|right\|zoneinfo\|zone.tab\|zone1970.tab\|W-SU\|WET\|posixrules\|MST7MDT\|iso3166.tab\|CST6CDT" | sort | sed 's/$/ -/g')
+	zonelist=$(find /usr/share/zoneinfo -maxdepth 1 | sed -n -e 's!^.*/!!p' | grep -v "America\|posix\|right\|zoneinfo\|zone.tab\|zone1970.tab\|W-SU\|WET\|posixrules\|MST7MDT\|iso3166.tab\|CST6CDT" | sort | sed 's/$/ -/g')
 	ZONE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your time-zone:" 15 60 5 $zonelist 3>&1 1>&2 2>&3)
 		check_dir=$(find /usr/share/zoneinfo -maxdepth 1 -type d | sed -n -e 's!^.*/!!p' | grep "$ZONE")
 		if [ -n "$check_dir" ]; then
 			sublist=$(find /usr/share/zoneinfo/"$ZONE" -maxdepth 1 | sed -n -e 's!^.*/!!p' | sort | sed 's/$/ -/g')
-			SUBZONE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your sub-zone:" 15 60 5  "<Back" "-" $sublist "<Back" 3>&1 1>&2 2>&3)
-			if [ "$SUBZONE" == "<Back" ]; then
-				set_zone
-			fi
+			SUBZONE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your sub-zone:" 15 60 5 $sublist3>&1 1>&2 2>&3)
 			chk_dir=$(find /usr/share/zoneinfo -maxdepth 1 -type  d | sed -n -e 's!^.*/!!p' | grep "$SUBZONE")
 			if [ -n "$chk_dir" ]; then
 				sublist=$(find /usr/share/zoneinfo/"$ZONE"/"$SUBZONE" -maxdepth 1 | sed -n -e 's!^.*/!!p' | sort | sed 's/$/ -/g')
@@ -359,9 +353,6 @@ configure_network() {
 install_bootloader() {
 	if [ "$INSTALLED" == "true" ]; then
 			if (whiptail --title "Arch Linux Installer" --yesno "Install GRUB onto /dev/$DRIVE?" 10 60) then
-				if (whiptail --title "Arch Linux Installer" --yesno "Install os-prober first? \n Required if you wish to dualboot with windows or mac OSX" 10 60) then
-					pacstrap "$ARCH" os-prober
-				fi
 				pacstrap "$ARCH" grub-bios
 				arch-chroot "$ARCH" grub-install --recheck /dev/"$DRIVE"
 				if [ "$?" -eq "0" ]; then
