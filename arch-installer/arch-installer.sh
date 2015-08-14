@@ -38,9 +38,8 @@ set_zone() {
 }
 
 set_keys() {
-	keyboard=$(whiptail --nocancel --inputbox "Set key-map:" 10 40 "us" 3>&1 1>&2 2>&3)
+	keyboard=$(whiptail --nocancel --inputbox "Set key-map:" 10 30 "us" 3>&1 1>&2 2>&3)
 	loadkeys "$keyboard"
-	keys_set=true
 	keys_set=true
 }
 
@@ -61,7 +60,7 @@ prepare_drives() {
 			SWAP=false
 			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 15 60) then
 				SWAP=true
-				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size(Align to M or G):" 10 40 "512M" 3>&1 1>&2 2>&3)
+				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size(Align to M or G):" 10 30 "512M" 3>&1 1>&2 2>&3)
 			fi				
 			GPT=false
 			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to use GPT partitioning?" 15 60) then
@@ -170,7 +169,7 @@ prepare_drives() {
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
-					new_mnt=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select another partition to create a mount point(OR swap):\nSelect done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
+					new_mnt=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select another partition to create a mount point [OR swap]:\nSelect done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)
 						if [ "$MNT" == "Other" ]; then
@@ -185,7 +184,7 @@ prepare_drives() {
 							mkfs.ext4 /dev/"$new_mnt"
 							mkdir "$ARCH"/"$MNT"
 							mount /dev/"$new_mnt" "$ARCH"/"$MNT"
-							points=$(echo  "$points" | grep -v "$MNT")
+							points=$(echo  "$points" | grep -v "$MNT\|SWAP")
 						fi
 					fi
 				done
@@ -349,19 +348,19 @@ reboot_system() {
 }
 
 main_menu() {
-	menu_item=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your locale" 15 60 5 \
-		"Set-Locale" ">" \
-		"Set-Timezone" ">" \
-		"Set-Keymap" ">" \
-		"Partition-Drive" ">" \
-		"Update-Mirrors" ">" \
-		"Install-Base-System" ">" \
-		"Configure-System" ">" \
-		"Set-Hostname" ">" \
-		"Add-User" ">" \
-		"Configure-Network" ">" \
-		"Install-Bootloader" ">" \
-		"Reboot-System"       ">"		 3>&1 1>&2 2>&3)
+	menu_item=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Menu Items:" 15 60 5 \
+		"Set Locale" ">" \
+		"Set Timezone" ">" \
+		"Set Keymap" ">" \
+		"Partition Drive" ">" \
+		"Update Mirrors" ">" \
+		"Install Base System" ">" \
+		"Configure System" ">" \
+		"Set Hostname" ">" \
+		"Add User" ">" \
+		"Configure Network" ">" \
+		"Install Bootloader" ">" \
+		"Reboot System"       ">"		 3>&1 1>&2 2>&3)
 	case "$menu_item" in
 		"Set Locale" ) 
 			if [ "$locale_set" == "true" ]; then
