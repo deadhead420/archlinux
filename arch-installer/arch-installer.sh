@@ -165,7 +165,7 @@ prepare_drives() {
 				mounted=true
 			fi
 			new_mnt=Begin
-			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >\nOther   >")
+			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >\nOther   >\nSWAP   >")
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
