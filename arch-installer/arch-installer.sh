@@ -304,10 +304,13 @@ set_hostname() {
 	if [ "$INSTALLED" == "true" ]; then
 		hostname=$(whiptail --nocancel --inputbox "Set hostname:" 10 40 "arch" 3>&1 1>&2 2>&3)
 		echo "$hostname" > "$ARCH"/etc/hostname
-		#Set ROOT password
 		echo "<####################################################>"
 		echo "Please enter the root password: "
 		arch-chroot "$ARCH" passwd
+		while [ "$?" -gt "0" ]
+			do
+				arch-chroot "$ARCH" passwd
+			done
 		clear
 		add_user
 	else
@@ -317,7 +320,20 @@ set_hostname() {
 }
 
 add_user() {
-	if [ "$INSTALLED" == "true" ]; then
+	if [ "$user_added" == "true" ]; then
+		if (whiptail --title "Arch Linux Installer" --yesno "User already added, create new sudo user now?" 10 60) then
+			usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
+			arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$usrname"
+			echo "<####################################################>"
+			echo "Please enter the sudo password for $usrname: "
+			arch-chroot "$ARCH" passwd "$usrname"
+			while [ "$?" -gt "0" ]
+				do
+					arch-chroot "$ARCH" passwd "$usrname"
+				done
+		fi
+		main_menu
+	elif [ "$INSTALLED" == "true" ]; then
 		if (whiptail --title "Arch Linux Installer" --yesno "Create a new sudo user now?" 10 60) then
 			usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
 		else
@@ -327,10 +343,15 @@ add_user() {
 		echo "<####################################################>"
 		echo "Please enter the sudo password for $usrname: "
 		arch-chroot "$ARCH" passwd "$usrname"
+		while [ "$?" -gt "0" ]
+			do
+				arch-chroot "$ARCH" passwd "$usrname"
+			done
 		clear
 		if (whiptail --title "Arch Linux Installer" --yesno "Enable sudo privelege for members of wheel?" 10 60) then
 			sed -i '/%wheel ALL=(ALL) ALL/s/^#//' $ARCH/etc/sudoers
 		fi
+		user_added=true
 		configure_network
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
@@ -380,6 +401,7 @@ install_bootloader() {
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
 		main_menu
 	fi
+	main_menu
 }
 
 reboot_system() {
