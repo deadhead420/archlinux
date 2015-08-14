@@ -184,7 +184,7 @@ prepare_drives() {
 							mkfs.ext4 /dev/"$new_mnt"
 							mkdir "$ARCH"/"$MNT"
 							mount /dev/"$new_mnt" "$ARCH"/"$MNT"
-							points=$(echo  "$points" | grep -v "$MNT\|SWAP")
+							points=$(echo  "$points" | grep -v "$MNT\|[SWAP]")
 						fi
 					fi
 				done
