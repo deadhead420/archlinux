@@ -3,7 +3,6 @@
 ARCH=/mnt
 INSTALLED=false
 BluBG=$'\e[44m';
-echo -e ${BluBG}
 
 set_locale() {
 	clear
@@ -16,7 +15,10 @@ set_locale() {
 	"Other"       "-"		 3>&1 1>&2 2>&3)
 	if [ "$LOCALE" = "Other" ]; then
 		localelist=$(</etc/locale.gen  awk '{print substr ($1,2) " " ($2);}' | grep -F ".UTF-8" | sed "1d" | sed 's/$/  -/g;s/ UTF-8//g')
-		LOCALE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your desired locale:" 15 60 5  $localelist 3>&1 1>&2 2>&3)
+		LOCALE=$(whiptail --title "Arch Linux Installer" --menu "Please enter your desired locale:" 15 60 5  $localelist 3>&1 1>&2 2>&3)
+		if [ "$?" -gt "0" ]; then
+			set_locale
+		fi
 	fi
 	locale_set=true
 	set_zone
@@ -28,11 +30,17 @@ set_zone() {
 		check_dir=$(find /usr/share/zoneinfo -maxdepth 1 -type d | sed -n -e 's!^.*/!!p' | grep "$ZONE")
 		if [ -n "$check_dir" ]; then
 			sublist=$(find /usr/share/zoneinfo/"$ZONE" -maxdepth 1 | sed -n -e 's!^.*/!!p' | sort | sed 's/$/ -/g')
-			SUBZONE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your sub-zone:" 15 60 5 $sublist 3>&1 1>&2 2>&3)
+			SUBZONE=$(whiptail --title "Arch Linux Installer" --menu "Please enter your sub-zone:" 15 60 5 $sublist 3>&1 1>&2 2>&3)
+			if [ "$?" -gt "0" ]; then
+				set_zone
+			fi
 			chk_dir=$(find /usr/share/zoneinfo/"$ZONE" -maxdepth 1 -type  d | sed -n -e 's!^.*/!!p' | grep "$SUBZONE")
 			if [ -n "$chk_dir" ]; then
 				sublist=$(find /usr/share/zoneinfo/"$ZONE"/"$SUBZONE" -maxdepth 1 | sed -n -e 's!^.*/!!p' | sort | sed 's/$/ -/g')
-				SUB_SUBZONE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please enter your sub-zone:" 15 60 5 $sublist 3>&1 1>&2 2>&3)
+				SUB_SUBZONE=$(whiptail --title "Arch Linux Installer" --menu "Please enter your sub-zone:" 15 60 5 $sublist 3>&1 1>&2 2>&3)
+				if [ "$?" -gt "0" ]; then
+					set_zone
+				fi
 			fi
 		fi
 	zone_set=true
@@ -40,7 +48,7 @@ set_zone() {
 }
 
 set_keys() {
-	keyboard=$(whiptail --nocancel --inputbox "Set key-map:" 10 30 "us" 3>&1 1>&2 2>&3)
+	keyboard=$(whiptail --nocancel --inputbox "Set key-map: \n If unsure leave default us" 10 30 "us" 3>&1 1>&2 2>&3)
 	loadkeys "$keyboard"
 	keys_set=true
 	prepare_drives
@@ -64,7 +72,7 @@ prepare_drives() {
 			SWAP=false
 			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 15 60) then
 				SWAP=true
-				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 10 30 "512M" 3>&1 1>&2 2>&3)
+				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 15 30 "512M" 3>&1 1>&2 2>&3)
 			fi				
 			GPT=false
 			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to use GPT partitioning?" 15 60) then
@@ -149,19 +157,18 @@ prepare_drives() {
 	 		fi
 		;;
 		"Manual Partition Drive")
-			part_tool=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired partitioning tool:" 15 60 5 \
+			part_tool=$(whiptail --title "Arch Linux Installer" --menu "Please select your desired partitioning tool:" 15 60 5 \
 																							"cfdisk"  "Best for beginners" \
 																							"fdisk"  "Command line Partitioning Tool" \
 																							"gdisk"  "GPT fdisk" \
-																							"parted"  "GNU Parted" \
-																							"<Back"   "Return to partitioning selection" 3>&1 1>&2 2>&3)
-			if [ "$part_tool" == "<Back" ]; then
+																							"parted"  "GNU Parted" 3>&1 1>&2 2>&3)
+			if [ "$?" -gt "0" ]; then
 				prepare_drives
 			fi
 			$part_tool /dev/"$DRIVE"
 			if [ "$?" -gt "0" ]; then
-				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing to menu please try again" 10 60
-				main_menu
+				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
+				prepare_drives
 			fi
 			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
 			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 $partition 3>&1 1>&2 2>&3)
@@ -170,13 +177,15 @@ prepare_drives() {
 			mount /dev/"$ROOT" "$ARCH"
 			if [ "$?" -eq "0" ]; then
 				mounted=true
+			else
+				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
+				prepare_drives
 			fi
-			new_mnt=Begin
 			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >\nOther   >")
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
-					new_mnt=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select another partition to create a mount point \n [OR swap]:\nSelect done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
+					new_mnt=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a partition to create a mount point OR swap: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
 						if [ "$MNT" == "Other" ]; then
