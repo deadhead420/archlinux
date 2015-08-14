@@ -48,7 +48,7 @@ set_zone() {
 }
 
 set_keys() {
-	keyboard=$(whiptail --nocancel --inputbox "Set key-map: \n If unsure leave default us" 10 30 "us" 3>&1 1>&2 2>&3)
+	keyboard=$(whiptail --nocancel --inputbox "Set key-map: \n If unsure leave default" 15 30 "us" 3>&1 1>&2 2>&3)
 	loadkeys "$keyboard"
 	keys_set=true
 	prepare_drives
@@ -80,7 +80,7 @@ prepare_drives() {
 			fi
 			if "$GPT" ; then
 				if "$SWAP" ; then
-					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n4\n\n+$SWAPSPACE\n8200\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE"
+					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n4\n\n+$SWAPSPACE\n8200\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE" > /dev/null
 					BOOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==2) print substr ($1,3) }')"
 					SWAP="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==5) print substr ($1,3) }')"
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
@@ -100,7 +100,7 @@ prepare_drives() {
 					mkdir $ARCH/boot
 					mount /dev/"$BOOT" "$ARCH"/boot
 				else
-					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE"
+					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE" > /dev/null
 					BOOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==2) print substr ($1,3) }')"
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
 					echo -e ${BluBG}
@@ -118,7 +118,7 @@ prepare_drives() {
 				fi
 			else
 				if "$SWAP" ; then
-					echo -e "o\nn\np\n1\n\n+100M\nn\np\n3\n\n+$SWAPSPACE\nt\n\n82\nn\np\n2\n\n\nw" | fdisk /dev/"$DRIVE"
+					echo -e "o\nn\np\n1\n\n+100M\nn\np\n3\n\n+$SWAPSPACE\nt\n\n82\nn\np\n2\n\n\nw" | fdisk /dev/"$DRIVE" > /dev/null
 					BOOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==2) print substr ($1,3) }')"
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==3) print substr ($1,3) }')"
 					SWAP="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
@@ -138,7 +138,7 @@ prepare_drives() {
 					mkdir "$ARCH"/boot		
 					mount /dev/"$BOOT" "$ARCH"/boot			
 				else
-					echo -e "o\nn\np\n1\n\n+100M\nn\np\n2\n\n\nw" | fdisk /dev/"$DRIVE"
+					echo -e "o\nn\np\n1\n\n+100M\nn\np\n2\n\n\nw" | fdisk /dev/"$DRIVE" > /dev/null
 					BOOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==2) print substr ($1,3) }')"
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==3) print substr ($1,3) }')"
 					clear
