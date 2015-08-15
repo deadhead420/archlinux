@@ -49,7 +49,6 @@ set_zone() {
 
 set_keys() {
 	keyboard=$(whiptail --nocancel --inputbox "Set key-map: \n If unsure leave default" 10 35 "us" 3>&1 1>&2 2>&3)
-	loadkeys "$keyboard"
 	keys_set=true
 	prepare_drives
 }
