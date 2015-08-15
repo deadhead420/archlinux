@@ -157,6 +157,8 @@ prepare_drives() {
 	 		fi
 		;;
 		"Manual Partition Drive")
+			clear
+			echo -e ${BluBG}
 			part_tool=$(whiptail --title "Arch Linux Installer" --menu "Please select your desired partitioning tool:" 15 60 5 \
 																							"cfdisk"  "Best for beginners" \
 																							"fdisk"  "Command line Partitioning Tool" \
@@ -172,35 +174,44 @@ prepare_drives() {
 			fi
 			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
 			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 $partition 3>&1 1>&2 2>&3)
-			wipefs -a /dev/"$ROOT"
-			mkfs.ext4 /dev/"$ROOT"
-			mount /dev/"$ROOT" "$ARCH"
-			if [ "$?" -eq "0" ]; then
-				mounted=true
+			if (whiptail --title "Arch Linux Installer" --yesno "This will create a new filesystem on /dev/$ROOT and mount it as the root filesystem. \nAre you sure you want to do this?" 10 60) then
+				wipefs -a /dev/"$ROOT"
+				mkfs.ext4 /dev/"$ROOT" > /dev/null
+				mount /dev/"$ROOT" "$ARCH"
+				if [ "$?" -eq "0" ]; then
+					mounted=true
+				else
+					whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
+					prepare_drives
+				fi
 			else
-				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
 				prepare_drives
 			fi
-			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >\nOther   >")
+			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >")
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
-					new_mnt=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a partition to create a mount point OR swap: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
-					if [ "$new_mnt" != "Done" ]; then
-						MNT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
-						if [ "$MNT" == "Other" ]; then
-							MNT=$(whiptail --nocancel --inputbox "Enter your desired mount point:/nNOTE this must be the full path" 10 40 "/path" 3>&1 1>&2 2>&3)
-						fi
-						if [ "$MNT" == "SWAP" ]; then
-							wipefs -a /dev/"$new_mnt"
-							mkswap /dev/"$new_mnt"
-							swapon /dev/"$new_mnt"
+					new_mnt=$(whiptail --title "Arch Linux Installer" --menu "Select a partition to create a mount point: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
+					if [ "$?" -eq "0" ]; then
+						new_mnt=Done
+					elif [ "$new_mnt" != "Done" ]; then
+						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
+						if [ "$?" -eq "0" ]; then
+							:
+						elif [ "$MNT" == "SWAP" ]; then
+							if (whiptail --title "Arch Linux Installer" --yesno "Will create swap space on /dev/$new_mnt \n Continue?" 10 60) then
+								wipefs -a /dev/"$new_mnt"
+								mkswap /dev/"$new_mnt" > /dev/null
+								swapon /dev/"$new_mnt"
+							fi
 						else
-							wipefs -a /dev/"$new_mnt"
-							mkfs.ext4 /dev/"$new_mnt"
-							mkdir "$ARCH"/"$MNT"
-							mount /dev/"$new_mnt" "$ARCH"/"$MNT"
-							points=$(echo  "$points" | grep -v "$MNT")
+							if (whiptail --title "Arch Linux Installer" --yesno "Will create mount point $MNT with /dev/$new_mnt \n Continue?" 10 60) then
+								wipefs -a /dev/"$new_mnt"
+								mkfs.ext4 /dev/"$new_mnt" > /dev/null
+								mkdir "$ARCH"/"$MNT"
+								mount /dev/"$new_mnt" "$ARCH"/"$MNT"
+								points=$(echo  "$points" | grep -v "$MNT")
+							fi
 						fi
 					fi
 				done
