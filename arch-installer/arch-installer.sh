@@ -54,7 +54,7 @@ set_keys() {
 }
 
 prepare_drives() {
-	drive=$(lsblk | grep "disk" | grep -v "rom" | awk '{print $1"      "$4}')
+	drive=$(lsblk | grep "disk" | grep -v "rom" | awk '{print $1   " "   $4}')
 	DRIVE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select the drive you would like to install arch onto:" 15 60 5 $drive 3>&1 1>&2 2>&3)
 	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 4 \
 	"Auto Partition Drive"          "-" \
@@ -63,7 +63,7 @@ prepare_drives() {
 
 	case "$PART" in
 		"Auto Partition Drive")
-			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n        Would you like to contunue? \n        Select yes to continue" 10 60) then
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "        WARNING! Will erase all data on /dev/$DRIVE!! \n       Would you like to contunue? \n          Select yes to continue" 10 60) then
 				wipefs -a -q /dev/"$DRIVE"
 			else
 				prepare_drives
