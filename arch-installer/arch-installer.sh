@@ -194,7 +194,7 @@ prepare_drives() {
 					new_mnt=$(whiptail --title "Arch Linux Installer" --nocancel --menu "Select a partition to create a mount point: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
-						if [ "$?" -eq "0" ]; then
+						if [ "$?" -gt "0" ]; then
 							:
 						elif [ "$MNT" == "SWAP" ]; then
 							if (whiptail --title "Arch Linux Installer" --yesno "Will create swap space on /dev/$new_mnt \n Continue?" 10 60) then
