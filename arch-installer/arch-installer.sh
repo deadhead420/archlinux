@@ -196,7 +196,7 @@ prepare_drives() {
 						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
 						if [ "$?" -gt "0" ]; then
 							:
-						elif [ "$MNT" == "SWAP" ]; then
+i						elif [ "$MNT" == "SWAP" ]; then
 							if (whiptail --title "Arch Linux Installer" --yesno "Will create swap space on /dev/$new_mnt \n Continue?" 10 60) then
 								wipefs -a /dev/"$new_mnt"
 								mkswap /dev/"$new_mnt" > /dev/null
@@ -269,12 +269,8 @@ install_base() {
 		fi
 	else
 		if [ "$INSTALLED" == "true" ]; then
-			if (whiptail --title "Arch Linux Installer" --yesno "Error root filesystem already installed at $ARCH. \n Begin configuring system?" 10 60) then
-				configure_system
-			else
 				whiptail --title "Test Message Box" --msgbox "Error root filesystem already installed at $ARCH \n Continuing to menu." 10 60
 				main_menu
-			fi
 		else
 			if (whiptail --title "Arch Linux Installer" --yesno "Error no filesystem mounted \n Return to drive partitioning?" 10 60) then
 				partition_drives
@@ -288,6 +284,10 @@ install_base() {
 
 configure_system() {
 	if [ "$INSTALLED" == "true" ]; then
+		if [ "$system_configured" == "true" ]; then
+			whiptail --title "Test Message Box" --msgbox "Error system already configured \n Continuing to menu." 10 60
+			main_menu
+		fi
 			sed -i -e "s/#$LOCALE/$LOCALE/" "$ARCH"/etc/locale.gen
 			echo LANG="$LOCALE" > "$ARCH"/etc/locale.conf
 			arch-chroot "$ARCH" locale-gen
@@ -492,12 +492,7 @@ main_menu() {
 		;;
 		"Configure System")
 			if [ "$INSTALLED" == "true" ]; then
-				if [ "$system_configured" != "true" ]; then
-					configure_system
-				else
-					whiptail --title "Arch Linux Installer" --msgbox "System already configured \n returning to menu" 10 60
-					main_menu
-				fi
+				configure_system
 			else
 				whiptail --title "Arch Linux Installer" --msgbox "The system hasn't been installed yet \n returning to menu" 10 60
 				main_menu
