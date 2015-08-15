@@ -63,7 +63,7 @@ prepare_drives() {
 
 	case "$PART" in
 		"Auto Partition Drive")
-			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "        WARNING! Will erase all data on /dev/$DRIVE!! \n       Would you like to contunue? \n          Select yes to continue" 10 60) then
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "    WARNING! Will erase all data on /dev/$DRIVE!! \n       Would you like to contunue? \n          Select yes to continue" 10 60) then
 				wipefs -a -q /dev/"$DRIVE"
 			else
 				prepare_drives
