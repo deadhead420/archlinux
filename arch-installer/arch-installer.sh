@@ -64,7 +64,7 @@ prepare_drives() {
 
 	case "$PART" in
 		"Auto Partition Drive")
-			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n Would you like to contunue? \n Select yes to continue" 10 60) then
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n Would you like to contunue? \n  Select yes to continue" 10 60) then
 				wipefs -a /dev/"$DRIVE"
 			else
 				prepare_drives
@@ -87,9 +87,9 @@ prepare_drives() {
 					echo -e ${BluBG}
 					clear
 					wipefs -a /dev/"$BOOT"
-					mkfs.ext4 /dev/"$BOOT"
+					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a /dev/"$ROOT"
-					mkfs.ext4 /dev/"$ROOT"
+					mkfs.ext4 -q /dev/"$ROOT"
 					wipefs -a /dev/"$SWAP"
 					mkswap /dev/"$SWAP"
 					swapon /dev/"$SWAP"
@@ -106,9 +106,9 @@ prepare_drives() {
 					echo -e ${BluBG}
 					clear
 					wipefs -a /dev/"$BOOT"
-					mkfs.ext4 /dev/"$BOOT"
+					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a /dev/"$ROOT"
-					mkfs.ext4 /dev/"$ROOT"
+					mkfs.ext4 -q /dev/"$ROOT"
 					mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
 						mounted=true
@@ -157,17 +157,17 @@ prepare_drives() {
 	 		fi
 		;;
 		"Manual Partition Drive")
-			clear
-			echo -e ${BluBG}
 			part_tool=$(whiptail --title "Arch Linux Installer" --menu "Please select your desired partitioning tool:" 15 60 5 \
-																							"cfdisk"  "Best for beginners" \
-																							"fdisk"  "Command line Partitioning Tool" \
-																							"gdisk"  "GPT fdisk" \
-																							"parted"  "GNU Parted" 3>&1 1>&2 2>&3)
+																							"cfdisk"  "Curses Interface" \
+																							"fdisk"   "CLI Partitioning" \
+																							"gdisk"   "GPT Partitioning" \
+																							"parted"  "GNU Parted CLI" 3>&1 1>&2 2>&3)
 			if [ "$?" -gt "0" ]; then
 				prepare_drives
 			fi
 			$part_tool /dev/"$DRIVE"
+			clear
+			echo -e ${BluBG}
 			if [ "$?" -gt "0" ]; then
 				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
 				prepare_drives
@@ -191,7 +191,7 @@ prepare_drives() {
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
-					new_mnt=$(whiptail --title "Arch Linux Installer" --nocancel --menu "Select a partition to create a mount point: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
+					new_mnt=$(whiptail --title "Arch Linux Installer" --nocancel --menu "Select a partition to create a mount point: \n *Select done when finished*" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
 						if [ "$?" -gt "0" ]; then
