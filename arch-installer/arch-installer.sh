@@ -191,10 +191,8 @@ prepare_drives() {
 			until [ "$new_mnt" == "Done" ] 
 				do
 					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
-					new_mnt=$(whiptail --title "Arch Linux Installer" --menu "Select a partition to create a mount point: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
-					if [ "$?" -eq "0" ]; then
-						new_mnt=Done
-					elif [ "$new_mnt" != "Done" ]; then
+					new_mnt=$(whiptail --title "Arch Linux Installer" --nocancel --menu "Select a partition to create a mount point: \n Select done when finished" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
+					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
 						if [ "$?" -eq "0" ]; then
 							:
