@@ -63,8 +63,8 @@ prepare_drives() {
 
 	case "$PART" in
 		"Auto Partition Drive")
-			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n Would you like to contunue? \n  Select yes to continue" 10 60) then
-				wipefs -a /dev/"$DRIVE"
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE!! \n        Would you like to contunue? \n        Select yes to continue" 10 60) then
+				wipefs -a -q /dev/"$DRIVE"
 			else
 				prepare_drives
 			fi
@@ -85,13 +85,13 @@ prepare_drives() {
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
 					echo -e ${BluBG}
 					clear
-					wipefs -a /dev/"$BOOT"
+					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
-					wipefs -a /dev/"$ROOT"
+					wipefs -a -q /dev/"$ROOT"
 					mkfs.ext4 -q /dev/"$ROOT"
-					wipefs -a /dev/"$SWAP"
-					mkswap /dev/"$SWAP"
-					swapon /dev/"$SWAP"
+					wipefs -a -q /dev/"$SWAP"
+					mkswap /dev/"$SWAP" > /dev/null
+					swapon /dev/"$SWAP" > /dev/null
 					mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
 						mounted=true
@@ -104,9 +104,9 @@ prepare_drives() {
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==4) print substr ($1,3) }')"
 					echo -e ${BluBG}
 					clear
-					wipefs -a /dev/"$BOOT"
+					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
-					wipefs -a /dev/"$ROOT"
+					wipefs -a -q /dev/"$ROOT"
 					mkfs.ext4 -q /dev/"$ROOT"
 					mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
@@ -128,8 +128,8 @@ prepare_drives() {
 					wipefs -a -q /dev/"$ROOT"
 					mkfs.ext4 -q /dev/"$ROOT"
 			        wipefs -a -q /dev/"$SWAP"
-					mkswap /dev/"$SWAP"
-					swapon /dev/"$SWAP"
+					mkswap /dev/"$SWAP" > /dev/null
+					swapon /dev/"$SWAP" > /dev/null
 		            mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
 						mounted=true
@@ -142,9 +142,9 @@ prepare_drives() {
 					ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==3) print substr ($1,3) }')"
 					clear
 					echo -e ${BluBG}
-					wipefs -a /dev/"$BOOT"
+					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
-					wipefs -a /dev/"$ROOT"
+					wipefs -a -q /dev/"$ROOT"
 					mkfs.ext4 -q /dev/"$ROOT"
 					mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
@@ -174,8 +174,8 @@ prepare_drives() {
 			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
 			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 $partition 3>&1 1>&2 2>&3)
 			if (whiptail --title "Arch Linux Installer" --yesno "This will create a new filesystem on /dev/$ROOT and mount it as the root filesystem. \nAre you sure you want to do this?" 10 60) then
-				wipefs -a /dev/"$ROOT"
-				mkfs.ext4 /dev/"$ROOT" > /dev/null
+				wipefs -a -q /dev/"$ROOT"
+				mkfs.ext4 -q /dev/"$ROOT"
 				mount /dev/"$ROOT" "$ARCH"
 				if [ "$?" -eq "0" ]; then
 					mounted=true
@@ -197,14 +197,14 @@ prepare_drives() {
 							:
 						elif [ "$MNT" == "SWAP" ]; then
 							if (whiptail --title "Arch Linux Installer" --yesno "Will create swap space on /dev/$new_mnt \n Continue?" 10 60) then
-								wipefs -a /dev/"$new_mnt"
+								wipefs -a -q /dev/"$new_mnt"
 								mkswap /dev/"$new_mnt" > /dev/null
-								swapon /dev/"$new_mnt"
+								swapon /dev/"$new_mnt" > /dev/null
 							fi
 						else
 							if (whiptail --title "Arch Linux Installer" --yesno "Will create mount point $MNT with /dev/$new_mnt \n Continue?" 10 60) then
-								wipefs -a /dev/"$new_mnt"
-								mkfs.ext4 /dev/"$new_mnt" > /dev/null
+								wipefs -a -q /dev/"$new_mnt"
+								mkfs.ext4 -q /dev/"$new_mnt"
 								mkdir "$ARCH"/"$MNT"
 								mount /dev/"$new_mnt" "$ARCH"/"$MNT"
 								points=$(echo  "$points" | grep -v "$MNT")
