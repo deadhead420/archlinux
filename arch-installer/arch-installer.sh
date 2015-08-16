@@ -172,7 +172,7 @@ prepare_drives() {
 				prepare_drives
 			fi
 			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
-			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 "$partition" 3>&1 1>&2 2>&3)
+			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 $partition 3>&1 1>&2 2>&3)
 			if (whiptail --title "Arch Linux Installer" --yesno "This will create a new filesystem on partition. \nAre you sure you want to do this?" 10 60) then
 				wipefs -a -q /dev/"$ROOT"
 				mkfs.ext4 -q /dev/"$ROOT"
