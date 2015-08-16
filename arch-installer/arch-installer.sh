@@ -171,7 +171,7 @@ prepare_drives() {
 				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
 				prepare_drives
 			fi
-			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
+			partition=$(lsblk | grep "$DRIVE" | grep -v "/\|1K" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
 			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 "$partition" 3>&1 1>&2 2>&3)
 			if (whiptail --title "Arch Linux Installer" --yesno "This will create a new filesystem on partition. \nAre you sure you want to do this?" 10 60) then
 				wipefs -a -q /dev/"$ROOT"
@@ -189,7 +189,7 @@ prepare_drives() {
 			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >")
 			until [ "$new_mnt" == "Done" ] 
 				do
-					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
+					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|1K\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
 					new_mnt=$(whiptail --title "Arch Linux Installer" --nocancel --menu "Select a partition to create a mount point: \n *Select done when finished*" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
@@ -207,7 +207,7 @@ prepare_drives() {
 								mkfs.ext4 -q /dev/"$new_mnt"
 								mkdir "$ARCH"/"$MNT"
 								mount /dev/"$new_mnt" "$ARCH"/"$MNT"
-								points=$(echo  "$points" | grep -v "$MNT")
+								points=$(echo  "$points" | grep -v "$MNT\|1K")
 							fi
 						fi
 					fi
