@@ -63,20 +63,27 @@ prepare_drives() {
 
 	case "$PART" in
 		"Auto Partition Drive")
-			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "    WARNING! Will erase all data on /dev/$DRIVE!! \n       Would you like to contunue? \n          Select yes to continue" 10 60) then
-				wipefs -a -q /dev/"$DRIVE"
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE! \n Would you like to contunue?" 10 60) then
+				sgdisk --zap-all "$DRIVE"
 			else
 				prepare_drives
 			fi
 			SWAP=false
-			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 15 60) then
+			if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 10 60) then
 				SWAP=true
 				SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 10 35 "512M" 3>&1 1>&2 2>&3)
-			fi				
-			GPT=false
-			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to use GPT partitioning?" 15 60) then
-				GPT=true
 			fi
+#			UEFI=false
+#			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to enable UEFI bios?" 10 60) then
+#				GPT=true			
+#				UEFI=true
+#			else
+				GPT=false
+				if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to use GPT partitioning?" 10 60) then
+					GPT=true
+				fi
+#			fi
+			clear
 			if "$GPT" ; then
 				if "$SWAP" ; then
 					echo -e "o\ny\nn\n1\n\n+100M\n\nn\n2\n\n+1M\nEF02\nn\n4\n\n+$SWAPSPACE\n8200\nn\n3\n\n\n\nw\ny" | gdisk /dev/"$DRIVE" > /dev/null
@@ -88,7 +95,10 @@ prepare_drives() {
 					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a -q /dev/"$ROOT"
-					mkfs.ext4 -q /dev/"$ROOT"
+					mkfs.ext4 -q /dev/"$ROOT" &
+					pid=$!
+					msg="Please wait while creating filesystem"
+					load
 					wipefs -a -q /dev/"$SWAP"
 					mkswap /dev/"$SWAP" > /dev/null
 					swapon /dev/"$SWAP" > /dev/null
@@ -107,7 +117,10 @@ prepare_drives() {
 					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a -q /dev/"$ROOT"
-					mkfs.ext4 -q /dev/"$ROOT"
+					mkfs.ext4 -q /dev/"$ROOT" &
+					pid=$!
+					msg="Please wait while creating filesystem"
+					load
 					mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
 						mounted=true
@@ -126,8 +139,11 @@ prepare_drives() {
 					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a -q /dev/"$ROOT"
-					mkfs.ext4 -q /dev/"$ROOT"
-			        wipefs -a -q /dev/"$SWAP"
+					mkfs.ext4 -q /dev/"$ROOT" &
+					pid=$!
+					msg="Please wait while creating filesystem"
+					load
+			       		wipefs -a -q /dev/"$SWAP"
 					mkswap /dev/"$SWAP" > /dev/null
 					swapon /dev/"$SWAP" > /dev/null
 		            mount /dev/"$ROOT" "$ARCH"
@@ -145,7 +161,10 @@ prepare_drives() {
 					wipefs -a -q /dev/"$BOOT"
 					mkfs.ext4 -q /dev/"$BOOT"
 					wipefs -a -q /dev/"$ROOT"
-					mkfs.ext4 -q /dev/"$ROOT"
+					mkfs.ext4 -q /dev/"$ROOT" &
+					pid=$!
+					msg="Please wait while creating filesystem"
+					load
 					mount /dev/"$ROOT" "$ARCH"
 					if [ "$?" -eq "0" ]; then
 						mounted=true
@@ -171,25 +190,28 @@ prepare_drives() {
 				whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
 				prepare_drives
 			fi
-			partition=$(lsblk | grep "$DRIVE" | grep -v "/" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
+			partition=$(lsblk | grep "$DRIVE" | grep -v "/\|1K" | sed "1d" | cut -c7- | awk '{print $1" "$4}')
 			ROOT=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Please select your desired root partition first:" 15 60 5 $partition 3>&1 1>&2 2>&3)
-			if (whiptail --title "Arch Linux Installer" --yesno "This will create a new filesystem on partition. \nAre you sure you want to do this?" 10 60) then
+			if (whiptail --title "Arch Linux Installer" --yesno "This will create a new filesystem on the partition. \nAre you sure you want to do this?" 10 60) then
 				wipefs -a -q /dev/"$ROOT"
-				mkfs.ext4 -q /dev/"$ROOT"
+				mkfs.ext4 -q /dev/"$ROOT" &
+					pid=$!
+					msg="Please wait while creating filesystem"
+					load
 				mount /dev/"$ROOT" "$ARCH"
 				if [ "$?" -eq "0" ]; then
 					mounted=true
 				else
 					whiptail --title "Arch Linux Installer" --msgbox "An error was detected during partitioning \n Returing partitioning menu" 10 60
 					prepare_drives
-				fi 
+				fi
 			else
 				prepare_drives
 			fi
 			points=$(echo -e "/boot   >\n/home   >\n/srv    >\n/usr    >\n/var    >\nSWAP   >")
 			until [ "$new_mnt" == "Done" ] 
 				do
-					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
+					partition=$(lsblk | grep "$DRIVE" | grep -v "/\|[SWAP]\|1K" | sed "1d" | cut -c7- | awk '{print $1"     "$4}')
 					new_mnt=$(whiptail --title "Arch Linux Installer" --nocancel --menu "Select a partition to create a mount point: \n *Select done when finished*" 15 60 5 $partition "Done" "Continue" 3>&1 1>&2 2>&3)
 					if [ "$new_mnt" != "Done" ]; then
 						MNT=$(whiptail --title "Arch Linux Installer" --menu "Select a mount point for /dev/$new_mnt" 15 60 5 $points 3>&1 1>&2 2>&3)				
@@ -204,7 +226,10 @@ prepare_drives() {
 						else
 							if (whiptail --title "Arch Linux Installer" --yesno "Will create mount point $MNT with /dev/$new_mnt \n Continue?" 10 60) then
 								wipefs -a -q /dev/"$new_mnt"
-								mkfs.ext4 -q /dev/"$new_mnt"
+								mkfs.ext4 -q /dev/"$new_mnt" &
+								pid=$!
+								msg="Please wait while creating filesystem"
+								load
 								mkdir "$ARCH"/"$MNT"
 								mount /dev/"$new_mnt" "$ARCH"/"$MNT"
 								points=$(echo  "$points" | grep -v "$MNT")
@@ -233,8 +258,12 @@ update_mirrors() {
 	countries=$(echo -e "AT Austria\n AU  Australia\n BE Belgium\n BG Bulgaria\n BR Brazil\n BY Belarus\n CA Canada\n CL Chile \n CN China\n CO Columbia\n CZ Czech-Republic\n DK Denmark\n EE Estonia\n ES Spain\n FI Finland\n FR France\n GB United-Kingdom\n HU Hungary\n IE Ireland\n IL Isreal\n IN India\n IT Italy\n JP Japan\n KR Korea\n KZ Kazakhstan\n LK Sri-Lanka\n LU Luxembourg\n LV Lativia\n MK Macedonia\n NC New-Caledonia\n NL Netherlands\n NO Norway\n NZ New-Zealand\n PL Poland\n PT Portugal\n RO Romania\n RS Serbia\n RU Russia\n SE Sweden\n SG Singapore\n SK Slovakia\n TR Turkey\n TW Taiwan\n UA Ukraine\n US United-States\n UZ Uzbekistan\n VN Viet-Nam\n ZA South-Africa")
 	if (whiptail --title "Arch Linux Installer" --yesno "Would you like to update your mirrorlist now?" 10 60) then
 		code=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select your country code:" 15 60 5 $countries 3>&1 1>&2 2>&3)
-		wget --append-output=/dev/null "https://www.archlinux.org/mirrorlist/?country=$code&protocol=http" -O /etc/pacman.d/mirrorlist 
-  		sed -i 's/#//' /etc/pacman.d/mirrorlist
+		wget --append-output=/dev/null "https://www.archlinux.org/mirrorlist/?country=$code&protocol=http" -O /etc/pacman.d/mirrorlist.bak
+		sed -i 's/#//' /etc/pacman.d/mirrorlist.bak
+		rankmirrors -n 6 /etc/pacman.d/mirrorlist.bak > /etc/pacman.d/mirrorlist &
+  		pid=$!
+		msg="Please wait while ranking mirrors"
+		load
   		mirrors_updated=true
 	fi
 	clear
@@ -245,7 +274,7 @@ install_base() {
 	if [[ -n "$ROOT" && "$INSTALLED" == "false" && "$mounted" == "true" ]]; then	
 		if (whiptail --title "Arch Linux Installer" --yesno "Begin installing base system onto /dev/$DRIVE?" 10 60) then
 			echo -e ${BluBG}
-			pacstrap "$ARCH" base base-devel
+			pacstrap "$ARCH" base base-devel libnewt
 			if [ "$?" -eq "0" ]; then
 				INSTALLED=true
 			else
@@ -304,6 +333,7 @@ configure_system() {
 					sed -i '/\[multilib]$/ {
 					N
 					/Include/s/#//g}' /mnt/etc/pacman.conf
+					multilib=true
 				fi
 			fi
 			if (whiptail --title "Arch Linux Installer" --yesno "Would you like to add archlinuxfr to your pacman.conf?" 10 60) then
@@ -322,13 +352,21 @@ set_hostname() {
 	if [ "$INSTALLED" == "true" ]; then
 		hostname=$(whiptail --nocancel --inputbox "Set hostname:" 10 40 "arch" 3>&1 1>&2 2>&3)
 		echo "$hostname" > "$ARCH"/etc/hostname
-		echo "<####################################################>"
-		echo "Please enter the root password: "
-		arch-chroot "$ARCH" passwd
-		while [ "$?" -gt "0" ]
-			do
-				arch-chroot "$ARCH" passwd
-			done
+		user=root
+		echo -e 'user='$user'
+			input=default
+			while [ "$input" != "$input_chk" ]
+                		do
+                       			 input=$(whiptail --passwordbox --nocancel "Please enter a new $user password" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+                		         input_chk=$(whiptail --passwordbox --nocancel "New $user password again" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+                       			 if [ "$input" != "$input_chk" ]; then
+                          		      whiptail --title "Test Message Box" --msgbox "Passwords do not match, please try again." 10 60
+                         		 fi
+             		        done
+        			echo -e "$input\n$input\n" | passwd "$user"' > /mnt/root/set.sh
+		chmod +x "$ARCH"/root/set.sh
+		arch-chroot "$ARCH" ./root/set.sh
+		rm "$ARCH"/root/set.sh
 		clear
 		add_user
 	else
@@ -340,31 +378,46 @@ set_hostname() {
 add_user() {
 	if [ "$user_added" == "true" ]; then
 		if (whiptail --title "Arch Linux Installer" --yesno "User already added, create new sudo user now?" 10 60) then
-			usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
-			arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$usrname"
-			echo "<####################################################>"
-			echo "Please enter the sudo password for $usrname: "
-			arch-chroot "$ARCH" passwd "$usrname"
-			while [ "$?" -gt "0" ]
-				do
-					arch-chroot "$ARCH" passwd "$usrname"
-				done
+			user=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
+			arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$user"
+			echo -e 'user='$user'
+					   input=default
+				           while [ "$input" != "$input_chk" ]
+                				do
+                       					 input=$(whiptail --passwordbox "Please enter a new password for $user" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+                				         input_chk=$(whiptail --passwordbox "New password for $user again" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+                       					 if [ "$input" != "$input_chk" ]; then
+                          				      whiptail --title "Test Message Box" --msgbox "Passwords do not match, please try again." 10 60
+                         				 fi
+             				        done
+        					echo -e "$input\n$input\n" | passwd "$user"' > /mnt/root/set.sh
+			chmod +x "$ARCH"/root/set.sh
+			arch-chroot "$ARCH" ./root/set.sh
+			rm "$ARCH"/root/set.sh
+			clear
 		fi
 		main_menu
 	elif [ "$INSTALLED" == "true" ]; then
 		if (whiptail --title "Arch Linux Installer" --yesno "Create a new sudo user now?" 10 60) then
-			usrname=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
+			user=$(whiptail --nocancel --inputbox "Set username:" 10 40 "" 3>&1 1>&2 2>&3)
 		else
 			configure_network
 		fi
-		arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$usrname"
-		echo "<####################################################>"
-		echo "Please enter the sudo password for $usrname: "
-		arch-chroot "$ARCH" passwd "$usrname"
-		while [ "$?" -gt "0" ]
-			do
-				arch-chroot "$ARCH" passwd "$usrname"
-			done
+		arch-chroot "$ARCH" useradd -m -g users -G wheel,audio,network,power,storage,optical -s /bin/bash "$user"
+		echo -e 'user='$user'
+				   input=default
+				           while [ "$input" != "$input_chk" ]
+                				do
+                       					 input=$(whiptail --passwordbox --nocancel "Please enter a new password for $user" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+                				         input_chk=$(whiptail --passwordbox --nocancel "New password for $user again" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+                       					 if [ "$input" != "$input_chk" ]; then
+                          				      whiptail --title "Test Message Box" --msgbox "Passwords do not match, please try again." 10 60
+                         				 fi
+             				        done
+        					echo -e "$input\n$input\n" | passwd "$user"' > /mnt/root/set.sh
+		chmod +x "$ARCH"/root/set.sh
+		arch-chroot "$ARCH" ./root/set.sh
+		rm "$ARCH"/root/set.sh
 		clear
 		if (whiptail --title "Arch Linux Installer" --yesno "Enable sudo privelege for members of wheel?" 10 60) then
 			sed -i '/%wheel ALL=(ALL) ALL/s/^#//' $ARCH/etc/sudoers
@@ -382,12 +435,12 @@ configure_network() {
 		#Enable DHCP
 			if (whiptail --title "Arch Linux Installer" --yesno "Enable DHCP at boot?" 10 60) then
 				arch-chroot "$ARCH" systemctl enable dhcpcd.service
+				clear
 			fi
 			clear
-		#Enable SSH
-			if (whiptail --title "Arch Linux Installer" --yesno "Enable SSH at boot?" 10 60) then
-				pacstrap $ARCH openssh
-				arch-chroot "$ARCH" systemctl enable sshd.service
+		#Wireless tools
+			if (whiptail --title "Arch Linux Installer" --yesno "Install wireless tools and WPA supplicant? \n *Necessary for wifi*" 10 60) then
+				pacstrap $ARCH wireless_tools wpa_supplicant
 			fi
 			clear
 			install_bootloader
@@ -400,7 +453,7 @@ configure_network() {
 install_bootloader() {
 	if [ "$INSTALLED" == "true" ]; then
 			if (whiptail --title "Arch Linux Installer" --yesno "Install GRUB onto /dev/$DRIVE?" 10 60) then
-				if (whiptail --title "Arch Linux Installer" --yesno "Install os-prober first \n Required to dualboot with windows or mac OSX" 10 60) then
+				if (whiptail --title "Arch Linux Installer" --yesno "Install os-prober first \n *Dualboot with windows or mac OSX*" 10 60) then
 					pacstrap "$ARCH" os-prober
 				fi
 				pacstrap "$ARCH" grub-bios
@@ -408,12 +461,12 @@ install_bootloader() {
 				if [ "$?" -eq "0" ]; then
 					loader_installed=true
 				else
-					whiptail --title "Arch Linux Installer" --msgbox "An error occured returning to menu" 10 60
+					whiptail --title "Arch Linux Installer" --msgbox "An error occured installing bootloader \nreturning to menu..." 10 60
 					main_menu
 				fi
 				arch-chroot "$ARCH" grub-mkconfig -o /boot/grub/grub.cfg
 				clear
-				reboot_system
+				graphics
 			fi
 	else
 		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
@@ -422,14 +475,236 @@ install_bootloader() {
 	main_menu
 }
 
+graphics() {
+	if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
+		if [ "$x" != "true" ]; then
+			if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install xorg-server now? \n*Select yes for a graphical interface*" 10 60) then
+				arch-chroot "$ARCH" pacman -Syyy --noconfirm xorg-server xorg-xinit xorg-twm xterm
+				clear
+				x=true
+				if (whiptail --title "Arch Linux Installer" --yesno "Install graphics drivers now? \nDrivers for NVIDIA, AMD, Intel, and Virtual Box guests" 10 60) then
+					until [ "$GPU" == "set" ]
+						do
+							GPU=$(whiptail --title "Arch Linux Installer" --menu "Select your GPU" 15 60 4 \
+							"AMD"     "AMD/ATI Graphics" \
+							"Intel"   "Intel Graphics" \
+							"Nvidia"  "NVIDIA Graphics" \
+							"VBOX"    "VirtualBox Guest" 3>&1 1>&2 2>&3)
+							if [ "$?" -gt "0" ]; then
+								if (whiptail --title "Arch Linux Installer" --yesno "Continue without installing graphics drivers? \n Default mesa drivers will be used" 10 60) then
+									GPU=set
+								fi
+							fi
+							case "$GPU" in
+								"AMD")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired AMD driver \n Cancel if none" 15 60 4 \
+									"xf86-video-ati"   "Open source AMD driver" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										if [ "$multilib" == "true" ]; then
+											arch-chroot "$ARCH" pacman -S --noconfirm xf86-video-ati lib32-mesa-libgl
+											clear
+										else
+											arch-chroot "$ARCH" pacman -S --noconfirm xf86-video-ati
+											clear
+										fi
+										if (whiptail --title "Arch Linux Installer" --yesno "Enable openGL support? \n Used for games and other graphics" 10 60) then
+											arch-chroot "$ARCH" pacman -S --noconfirm mesa-libgl
+											clear
+										fi
+										GPU=set
+									fi
+								;;
+								"Intel")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired Intel driver \n Cancel if none" 15 60 4 \
+									"xf86-video-intel"     "Open source Intel driver" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										if [ "$multilib" == "true" ]; then
+											arch-chroot "$ARCH" pacman -S --noconfirm xf86-video-intel lib32-mesa-libgl
+											clear
+										else
+											arch-chroot "$ARCH" pacman -S --noconfirm xf86-video-intel
+											clear
+										fi
+										if (whiptail --title "Arch Linux Installer" --yesno "Enable openGL support? \n Used for games and other graphics" 10 60) then
+											arch-chroot "$ARCH" pacman -S --noconfirm mesa-libgl
+											clear
+										fi
+										GPU=set
+									fi
+								;;
+								"Nvidia")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired Intel driver \n Cancel if none" 15 60 4 \
+									"nvidia"       "Latest stable nvidia" \
+									"nvidia-340xx" "Legacy 340xx branch" \
+									"nvidia-304xx" "Legaxy 304xx branch" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										if [ "$multilib" == "true" ]; then
+											arch-chroot "$ARCH" pacman -S --noconfirm "$DRIV" "$DRIV"-libgl lib32-"$DRIV"-libgl
+										else
+											arch-chroot "$ARCH" pacman -S --noconfirm "$DRIV" "$DRIV"-libgl
+										fi
+										if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install NVIDIA utils?" 10 60) then
+											if [ "$multilib" == "true" ]; then
+												arch-chroot "$ARCH" pacman -S --noconfirm "$ACH" "$DRIV"-utils lib32-"$DRIV"-utils
+											else
+												arch-chroot "$ARCH" pacman -S --noconfirm "$DRIV"-utils
+											fi
+										fi
+										GPU=set
+									fi
+								;;
+								"VBOX")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Provides graphics and features for virtualbox guests:" 15 60 4 \
+									"virtualbox-guest-additions" "-" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										arch-chroot "$ARCH" pacman -S --noconfirm virtualbox-guest-utils
+										echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/vbox.conf
+										GPU=set
+									fi
+								;;
+							esac
+						done
+				fi
+			else
+				if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you dont want graphics?" 10 60) then
+					reboot_system
+				else
+					graphics
+				fi
+			fi
+		fi
+		if [ "$x" == "true" ]; then
+			if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install a desktop enviornment or window manager?" 10 60) then
+				DE=$(whiptail --title  "Arch Linux Installer" --menu "Select your desired enviornment:" 15 60 4 \
+				"xfce4"    "Light  DE" \
+				"cinnamon" "Elegant DE" \
+				"gnome"    "Modern DE" \
+				"KDE"      "Modern DE" \
+				"awesome"  "Awesome WM" \
+				"dwm"      "Dynamic WM" \
+				"i3"       "i3 tiling WM" 3>&1 1>&2 2>&3)
+				if [ "$?" -gt "0" ]; then
+					if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you sure you dont want a desktop? \nYou will be booted into a command line" 10 60) then
+						reboot_system
+					fi
+				fi
+				case "$DE" in
+					"xfce4")
+						if (whiptail --title "Arch Linux Installer" --yesno "Install xfce4 goodies?" 10 60) then
+							envr="xfce4"
+							extra="xfce4-goodies"
+						else
+							envr="xfce4"
+						fi
+						start_term="exec startxfce4"
+					;;
+					"cinnamon")
+						envr="cinnamon"
+						start_term="exec cinnamon-session"
+					;;
+					"gnome")
+						if (whiptail --title "Arch Linux Installer" --yesno "Install gnome extras?" 10 60) then
+							envr="gnome"
+							extra="gnome-extra"
+						else
+							envr="gnome"
+						fi
+						if (whiptail --title "Arch Linux Installer" --yesno "Use classic gnome session? \nSelect no for standard gnome" 10 60) then
+							start_term="exec env GNOME_SHELL_SESSION_MODE=classic gnome-session --session gnome-classic"
+						else
+							start_term="exec gnome-session"
+						fi
+					;;
+#					"KDE")
+					
+#					;;
+					"awesome")
+						envr="awesome"
+						start_term="exec awesome"
+					;;
+					"dwm")
+						envr="dwm"
+						start_term="exec dwm"
+					;;
+					"i3")
+						envr="i3"
+						start_term="exec i3"
+					;;
+				esac
+				if [ -n "$envr" ]; then
+					if [ -n "$extra" ]; then
+						arch-chroot "$ARCH" pacman -S --noconfirm "$envr" "$extra"
+					else
+						arch-chroot "$ARCH" pacman -S --noconfirm "$envr"
+					fi
+					int=2
+					home=$(find /mnt/home -type d | awk "NR==$int")
+					while [ -n "$home" ]
+						do
+							echo "$start_term" > "$home"/.xinitrc
+							int=$((int+1))
+							home=$(find /mnt/home -type d | awk "NR==$int")
+						done
+					whiptail --title "Test Message Box" --msgbox "$DE installed successfully \nOn login use the command 'startx'" 10 60
+				fi
+			else
+				if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you sure you dont want a desktop? \nYou will be booted into a command line" 10 60) then				
+					install_software
+				else
+					graphics
+				fi
+			fi
+		fi
+		install_software
+	else
+		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
+		main_menu
+	fi
+}
+
+install_software() {
+	if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
+		if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install some common software?" 10 60) then
+			software=$(whiptail --title "Test Checklist Dialog" --checklist "Choose your desired software \nUse spacebar to check/uncheck \npress enter when finished" 20 60 10 \
+						"openssh" "Secure Shell Deamon" ON \
+						"vim" 	  	  "Popular Text Editor" ON \
+						"zsh"     	  "The Z shell" ON \
+						"tmux"    	  "Terminal multiplxer" OFF \
+						"screen"  	  "GNU Screen" OFF \
+						"netctl"	  "CLI Wireless Controls " OFF \
+						"htop"        "Process Info" OFF \
+						"mplayer"     "Media Player" OFF \
+						"screenfetch" "Display System Info" OFF \
+						"gimp"        "GNU Image Manipulation " OFF \
+						"firefox"     "Graphical Web Browser" OFF \
+						"chromium"    "Graphical Web Browser" OFF \
+						"lynx"        "Terminal Web Browser" OFF \
+						"ufw"         "Uncomplicated Firewall" OFF \
+						"apache"  	  "Web Server" OFF 3>&1 1>&2 2>&3)
+			download=$(echo "$software" | sed 's/\"//g')
+			if [ "$?" -eq "0" ]; then
+    			arch-chroot "$ARCH" pacman -Sy --noconfirm $download
+			fi
+		fi
+	else
+		whiptail --title "Test Message Box" --msgbox "Error no root filesystem installed at $ARCH \n Continuing to menu." 10 60
+		main_menu
+	fi
+	reboot_system
+}
+
 reboot_system() {
 	if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then	
 		if (whiptail --title "Arch Linux Installer" --yesno "Install process complete! Reboot now?" 10 60) then
 			umount -R $ARCH
 			reboot
 		else
-			whiptail --title "Arch Linux Installer" --msgbox "System fully installed \n Exiting arch installer" 10 60
-			exit
+			if (whiptail --title "Arch Linux Installer" --yesno "System fully installed \nWould you like to unmount?" 10 60) then
+				umount -R "$ARCH"
+				exit
+			else
+				exit
+			fi
 		fi
 	else
 		if (whiptail --title "Arch Linux Installer" --yesno "Install not complete, are you sure you want to reboot?" 10 60) then
@@ -441,21 +716,38 @@ reboot_system() {
 	fi
 }
 
+load() {
+	{       int="1"
+                while (true)
+    	            do
+    	                proc=$(ps | grep "$pid")
+    	                if [ "$?" -gt "0" ]; then break; fi
+    	                sleep 0.5
+    	                echo $int
+    	                int=$((int+1))
+    	            done
+                echo 100
+                sleep 1
+                } | whiptail --title "Arch Linux Installer" --gauge "$msg" 8 78 0
+}
+
 main_menu() {
 	menu_item=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Menu Items:" 15 60 5 \
-		"Set Locale"          "-" \
-		"Set Timezone"        "-" \
-		"Set Keymap"          "-" \
-		"Partition Drive"     "-" \
-		"Update Mirrors"      "-" \
-		"Install Base System" "-" \
-		"Configure System"    "-" \
-		"Set Hostname"        "-" \
-		"Add User"            "-" \
-		"Configure Network"   "-" \
-		"Install Bootloader"  "-" \
-		"Reboot System"       "-" \
-		"Exit Installer"      "-" 3>&1 1>&2 2>&3)
+		"Set Locale"            "-" \
+		"Set Timezone"          "-" \
+		"Set Keymap"            "-" \
+		"Partition Drive"       "-" \
+		"Update Mirrors"        "-" \
+		"Install Base System"   "-" \
+		"Configure System"      "-" \
+		"Set Hostname"          "-" \
+		"Add User"              "-" \
+		"Configure Network"     "-" \
+		"Install Bootloader"    "-" \
+		"Install Graphics"      "-"
+		"Install Software"      "-" \
+		"Reboot System"         "-" \
+		"Exit Installer"        "-" 3>&1 1>&2 2>&3)
 	case "$menu_item" in
 		"Set Locale" ) 
 			if [ "$locale_set" == "true" ]; then
@@ -529,8 +821,11 @@ main_menu() {
 				main_menu
 			fi
 		;;
-		"Reboot System")
-			reboot_system
+		"Install Graphics") graphics
+		;;
+		"Install Software") install_software
+		;;
+		"Reboot System") reboot_system
 		;;
 		"Exit Installer")
 			if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
