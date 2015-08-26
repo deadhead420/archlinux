@@ -1,5 +1,4 @@
 #!/bin/bash
-sleep 2
 ping -w 1.5 google.com &> /dev/null
 if [ "$?" -gt "0" ]; then
 	interface=$(ip addr | grep wlp | awk 'NR==1 {print $2}' | sed 's/://')
@@ -17,7 +16,7 @@ if [ "$?" -gt "0" ]; then
 	fi
 else
 	if (whiptail --title "Arch Linux Installer" --yesno "Welcome to the Deadhead arch-installer! \n Would you like to begin the install process?" 10 60) then
-		wget -O .arch_installer.sh https://raw.githubusercontent.com/deadhead420/archlinux/master/arch-installer/arch-installer.sh
+		wget -O .arch_installer.sh https://raw.githubusercontent.com/deadhead420/archlinux/master/arch-installer/arch-installer.sh &> /dev/null
     	if [ "$?" -eq "0" ]; then
     	    chmod +x .arch_installer.sh
     	    ./.arch_installer.sh
