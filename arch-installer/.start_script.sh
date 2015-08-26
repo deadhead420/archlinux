@@ -1,4 +1,15 @@
 #!/bin/bash
+
+echo "Initating installer please wait..."
+i=1
+ping -w 1.5 google.com &> /dev/null
+while [[ "$?" -gt "0" && "$i" -lt "8" ]]
+	do
+		sleep 0.5
+		i=$((i+1))
+		ping -w 1.5 google.com &> /dev/null
+	done
+
 interface=$(ip addr | grep wlp | awk 'NR==1 {print $2}' | sed 's/://')
 if [ -n "$interface" ]; then
     if (whiptail --title "Arch Linux Installer" --yesno "Would you like to connect to wifi?" 10 60) then
