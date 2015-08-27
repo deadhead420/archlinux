@@ -7,15 +7,15 @@
    [0;36m/##(   )##\                                                 [1;30m [36m
   [0;36m/#.--   --.#\[1;37m   A simple, elegant and lightweight linux distrobution     [1;30m
  [0;36m/`           `\[0m                                               [1;30m [36m [36m [1;36m [0m
-[1;37m   Welcome to the Deadhead Arch-Installer!
+[1;37m   Welcome to the Deadhead Arch-Installer ISO!
    Simplifying the Arch Linux install process.
 
    Any questions, comments, or bug reports can be sent to the developer:
 [0;36m   Dylan Schacht (deadhead) - deadhead3492@gmail.com
 
-[1;37m   Enjoy the installer, and dont forget to share!
+[1;37m   Enjoy the installer, and keep it simple!
     
    To begin installing Arch Linux simply type: 
-[0;36m   'arch-installer'                           
 
+[0;36m   'arch-installer'                           
 [0m

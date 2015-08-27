@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "Initating installer please wait..."
 i=1
 ping -w 1.5 google.com &> /dev/null
@@ -18,6 +17,7 @@ if [ -n "$interface" ]; then
 fi
 
 if (whiptail --title "Arch Linux Installer" --yesno "Welcome to the Deadhead arch-installer! \n Would you like to begin the install process?" 10 60) then
+	clear
 	ping -w 1.5 google.com &> /dev/null
 	if [ "$?" -eq "0" ]; then	
 		wget -O /root/.arch_installer.sh https://raw.githubusercontent.com/deadhead420/archlinux/master/arch-installer/arch-installer.sh &> /dev/null
