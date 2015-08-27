@@ -200,19 +200,25 @@ prepare_drives() {
 			lvm lvcreate -L 500M -n tmp lvm &> /dev/null
 			lvm lvcreate -l 100%FREE -n lvroot lvm &> /dev/null
             clear
-			cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/lvm/lvroot
-			cryptsetup open --type luks /dev/lvm/lvroot root
-			mkfs -q -t ext4 /dev/mapper/root &> /dev/null &
-			pid=$! pri=1 msg="Please wait while creating encrypted filesystem" load
-			mount -t ext4 /dev/mapper/root "$ARCH"
-			if [ "$?" -eq "0" ]; then
-				mounted=true
-				crypted=true
+            echo "This will encrypt /dev/$ROOT are you sure you want to continue? [ y/N ]: "
+            read input
+            if [ "$input" == [y][Y][yes][""] ]; then
+				cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/lvm/lvroot
+				cryptsetup open --type luks /dev/lvm/lvroot root
+				mkfs -q -t ext4 /dev/mapper/root &> /dev/null &
+				pid=$! pri=1 msg="Please wait while creating encrypted filesystem" load
+				mount -t ext4 /dev/mapper/root "$ARCH"
+				if [ "$?" -eq "0" ]; then
+					mounted=true
+					crypted=true
+				fi
+				wipefs -a /dev/"$BOOT"
+				mkfs -q -t ext4 /dev/"$BOOT" &> /dev/null
+				mkdir "$ARCH"/boot
+				mount -t ext4 /dev/"$BOOT" "$ARCH"/boot
+			else
+				prepare_drives
 			fi
-			wipefs -a /dev/"$BOOT"
-			mkfs -q -t ext4 /dev/"$BOOT" &> /dev/null
-			mkdir "$ARCH"/boot
-			mount -t ext4 /dev/"$BOOT" "$ARCH"/boot
 		;;
 		"Manual Partition Drive")
 			$part_tool /dev/"$DRIVE"
