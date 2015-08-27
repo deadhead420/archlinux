@@ -89,12 +89,18 @@ set_keys() {
 prepare_drives() {
 	drive=$(lsblk | grep "disk" | grep -v "rom" | awk '{print $1   " "   $4}')
 	DRIVE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select the drive you would like to install arch onto:" 15 60 5 $drive 3>&1 1>&2 2>&3)
-	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 6 \
+	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 4 \
 	"Auto Partition Drive"           "-" \
 	"Auto partition encrypted LVM"   "-" \
 	"Manual Partition Drive"         "-" \
-	"Return To Menu"                 "-" 3>&1 1>&2 2>&3)
-	if [ "$PART" == "Auto partition encrypted LVM" ] || [ "$PART" == "Auto Partition Drive" ]; then
+	"Main Menu"                 "-" 3>&1 1>&2 2>&3)
+	if [ "$PART" == "Main Menu" ]; then
+		if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you want to return to menu?" 10 60) then
+			main_menu
+		else
+			prepare_drives
+		fi
+	elif [ "$PART" == "Auto partition encrypted LVM" ] || [ "$PART" == "Auto Partition Drive" ]; then
 		if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE! \n Would you like to contunue?" 10 60) then
 			sgdisk --zap-all "$DRIVE"
 		else
@@ -199,26 +205,20 @@ prepare_drives() {
 			fi
 			lvm lvcreate -L 500M -n tmp lvm &> /dev/null
 			lvm lvcreate -l 100%FREE -n lvroot lvm &> /dev/null
-            clear
-            echo "This will encrypt /dev/$ROOT are you sure you want to continue? [ y/N ]: "
-            read input
-            if [ "$input" == [y][Y][yes][""] ]; then
-				cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/lvm/lvroot
-				cryptsetup open --type luks /dev/lvm/lvroot root
-				mkfs -q -t ext4 /dev/mapper/root &> /dev/null &
-				pid=$! pri=1 msg="Please wait while creating encrypted filesystem" load
-				mount -t ext4 /dev/mapper/root "$ARCH"
-				if [ "$?" -eq "0" ]; then
-					mounted=true
-					crypted=true
-				fi
-				wipefs -a /dev/"$BOOT"
-				mkfs -q -t ext4 /dev/"$BOOT" &> /dev/null
-				mkdir "$ARCH"/boot
-				mount -t ext4 /dev/"$BOOT" "$ARCH"/boot
-			else
-				prepare_drives
+                        clear
+			cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/lvm/lvroot
+			cryptsetup open --type luks /dev/lvm/lvroot root
+			mkfs -q -t ext4 /dev/mapper/root &> /dev/null &
+			pid=$! pri=1 msg="Please wait while creating encrypted filesystem" load
+			mount -t ext4 /dev/mapper/root "$ARCH"
+			if [ "$?" -eq "0" ]; then
+				mounted=true
+				crypted=true
 			fi
+			wipefs -a /dev/"$BOOT"
+			mkfs -q -t ext4 /dev/"$BOOT" &> /dev/null
+			mkdir "$ARCH"/boot
+			mount -t ext4 /dev/"$BOOT" "$ARCH"/boot
 		;;
 		"Manual Partition Drive")
 			$part_tool /dev/"$DRIVE"
@@ -271,13 +271,6 @@ prepare_drives() {
 						fi
 					fi
 				done
-		;;
-		"Return To Menu")
-			if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you want to return to menu?" 10 60) then
-				main_menu
-			else
-				prepare_drives
-			fi
 		;;
 	esac
 	if [ "$mounted" != "true" ]; then
