@@ -93,13 +93,9 @@ prepare_drives() {
 	"Auto Partition Drive"           "-" \
 	"Auto partition encrypted LVM"   "-" \
 	"Manual Partition Drive"         "-" \
-	"Main Menu"                 "-" 3>&1 1>&2 2>&3)
-	if [ "$PART" == "Main Menu" ]; then
-		if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you want to return to menu?" 10 60) then
-			main_menu
-		else
-			prepare_drives
-		fi
+	"Back"                 "-" 3>&1 1>&2 2>&3)
+	if [ "$PART" == "Back" ]; then
+		prepare_drives
 	elif [ "$PART" == "Auto partition encrypted LVM" ] || [ "$PART" == "Auto Partition Drive" ]; then
 		if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE! \n Would you like to contunue?" 10 60) then
 			sgdisk --zap-all "$DRIVE"
