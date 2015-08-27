@@ -5,6 +5,7 @@ INSTALLED=false
 BluBG=$'\e[44m';
 
 check_connection() {
+	clear
 	ping -w 1.5 google.com &> /dev/null
 	if [ "$?" -gt "0" ]; then
 		whiptail --title "Test Message Box" --msgbox "No internet connection found. \n *Check your connection and try again" 10 60
@@ -16,26 +17,22 @@ check_connection() {
 	end=$(date +%s)
 	diff=$((end-start))
 	case "$diff" in
-		[1-4]) down="0.5"
+		[1-4]) down="0.5" ;;
+		[5-9]) down="1.5" ;;
+		1[0-9]) down="3" ;;
+		2[0-9]) down="4" ;;
+		3[0-9]) down="5" ;;
+		4[0-9]) down="6" ;;
+		5[0-9]) down="7" ;;
+		6[0-9]) down="8" ;;
+		[0-9][0-9][0-9]) 
+			if (whiptail --title "Arch Linux Installer" --yesno "Your connection is very slow, this might take a long time...\n *Continue?" 10 60) then
+				down="15"
+			else
+				exit
+			fi
 		;;
-		[5-9]) down=1
-		;;
-		1[0-9]) down="2"
-		;;
-		2[0-9]) down="3"
-		;;
-		3[0-9]) down="4"
-		;;
-		4[0-9]) down="5"
-		;;
-		5[0-9]) down="7"
-		;;
-		6[0-9]) down="8"
-		;;
-		[0-9][0-9][0-9]) down="15"
-		;;
-		*) down="10"
-		;;
+		*) down="10" ;;
 	esac
 	set_locale
 }
@@ -119,12 +116,6 @@ prepare_drives() {
 			fi
 #		fi
 		clear
-	elif [ "$PART" == "Return To Menu" ]; then
-		if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you want to return to menu?" 10 60) then
-			main_menu
-		else
-			prepare_drives
-		fi
 	else
 		part_tool=$(whiptail --title "Arch Linux Installer" --menu "Please select your desired partitioning tool:" 15 60 5 \
 																	"cfdisk"  "Curses Interface" \
@@ -274,6 +265,13 @@ prepare_drives() {
 						fi
 					fi
 				done
+		;;
+		"Return To Menu")
+			if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you want to return to menu?" 10 60) then
+				main_menu
+			else
+				prepare_drives
+			fi
 		;;
 	esac
 	if [ "$mounted" != "true" ]; then
@@ -594,19 +592,22 @@ graphics() {
 			if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install a desktop enviornment or window manager?" 10 60) then
 				DE=$(whiptail --title  "Arch Linux Installer" --menu "Select your desired enviornment:" 15 60 6 \
 				"xfce4"    "Light  DE" \
+				"i3"       "Tiling WM" \
 				"mate"     "Light DE" \
 				"lxde"     "Light DE" \
 				"gnome"    "Modern DE" \
+				"cinnamon" "Eligant DE" \
+				"openbox"  "Stacking WM" \
+				"fluxbox"  "Light WM" \
 				"awesome"  "Awesome WM" \
-				"dwm"      "Dynamic WM" \
-				"i3"       "i3 tiling WM" 3>&1 1>&2 2>&3)
+				"dwm"      "Dynamic WM" 3>&1 1>&2 2>&3)
 				if [ "$?" -gt "0" ]; then
 					if (whiptail --title "Arch Linux Installer" --yesno "Are you sure you sure you dont want a desktop? \nYou will be booted into a command line" 10 60) then
 						install_software
 					fi
 				fi
 				case "$DE" in
-					"xfce4")
+					"xfce4") start_term="exec startxfce4"
 						if (whiptail --title "Arch Linux Installer" --yesno "Install xfce4 goodies?" 10 60) then
 							envr="xfce4 xfce4-goodies"
 						else
@@ -620,13 +621,9 @@ graphics() {
 							else
 								echo "exec xfce4-session" > "$ARCH"/root/.xinitrc
 							fi
-						else
-							start_term="exec startxfce4"
 						fi
 					;;
-					"cinnamon")
-						envr="cinnamon slim archlinux-themes-slim"
-						DM="slim.service"
+					"cinnamon") envr="cinnamon slim archlinux-themes-slim" DM="slim.service"
 						if [ "$user_added" == "true" ]; then
 							echo "exec gnome-session-cinnamon" > "$ARCH"/home/"$user"/.xinitrc
 						else
@@ -642,7 +639,7 @@ graphics() {
 						fi
 						DM="gdm.service"
 					;;
-					"mate")
+					"mate") start_term="exec mate-session"
 						if (whiptail --title "Arch Linux Installer" --yesno "Install mate extras?" 10 60) then
 							envr="mate mate-extra"
 						else
@@ -652,12 +649,10 @@ graphics() {
 							envr="$envr slim archlinux-themes-slim"
 							DM="slim.service"
 							if [ "$user_added" == "true" ]; then
-								echo "exec mate-session" > "$ARCH"/home/"$user"/.xinitrc
+								echo "$start_term" > "$ARCH"/home/"$user"/.xinitrc
 							else
-								echo "exec mate-session" > "$ARCH"/root/.xinitrc
+								echo "$start_term" > "$ARCH"/root/.xinitrc
 							fi
-						else
-							start_term="exec mate-session"
 						fi
 					;;
 					"lxde")
@@ -674,18 +669,34 @@ graphics() {
 							start_term="exec startlxde"
 						fi
 					;;
-					"awesome")
-						envr="awesome"
-						start_term="exec awesome"
+					"openbox") envr="openbox" start_term="exec openbox-session"
+						if (whiptail --title "Arch Linux Installer" --yesno "Install SLiM display manager?" 10 60) then
+							envr="$envr slim archlinux-themes-slim"
+							DM="slim.service"
+							if [ "$user_added" == "true" ]; then
+								echo "$start_term" > "$ARCH"/home/"$user"/.xinitrc
+							else
+								echo "$start_term" > "$ARCH"/root/.xinitrc
+							fi
+						fi
+						
 					;;
-					"dwm")
-						envr="dwm"
-						start_term="exec dwm"
+					"fluxbox") envr="fluxbox" start_term="exec startfluxbox"
+						if (whiptail --title "Arch Linux Installer" --yesno "Install SLiM display manager?" 10 60) then
+							envr="$envr slim archlinux-themes-slim"
+							DM="slim.service"
+							if [ "$user_added" == "true" ]; then
+								echo "$start_term" > "$ARCH"/home/"$user"/.xinitrc
+							else
+								echo "$start_term" > "$ARCH"/root/.xinitrc
+							fi
+						fi
+						
 					;;
-					"i3")
-						envr="i3"
-						start_term="exec i3"
-					;;
+
+					"awesome") envr="awesome" start_term="exec awesome" ;;
+					"dwm") envr="dwm" start_term="exec dwm" ;;
+					"i3") envr="i3" start_term="exec i3" ;;
 				esac
 				if [ -n "$envr" ]; then
 					pacstrap "$ARCH" ${envr} &> /dev/null &
@@ -723,16 +734,20 @@ install_software() {
 						"openssh" "Secure Shell Deamon" ON \
 						"vim" 	  	  "Popular Text Editor" ON \
 						"zsh"     	  "The Z shell" ON \
+						"wget"        "CLI web downloader" ON \
 						"tmux"    	  "Terminal multiplxer" OFF \
 						"screen"  	  "GNU Screen" OFF \
 						"netctl"	  "CLI Wireless Controls " OFF \
-						"htop"        "Process Info" OFF \
+						"htop"        "CLI process Info" OFF \
 						"mplayer"     "Media Player" OFF \
 						"screenfetch" "Display System Info" OFF \
 						"gparted"     "GNU Parted GUI" OFF \
 						"gimp"        "GNU Image Manipulation " OFF \
 						"firefox"     "Graphical Web Browser" OFF \
 						"chromium"    "Graphical Web Browser" OFF \
+						"libreoffice" "Open source word processing " OFF \
+						"vlc"         "GUI media player" OFF \
+						"virtualbox"  "Desktop virtuialization" OFF \
 						"lynx"        "Terminal Web Browser" OFF \
 						"ufw"         "Uncomplicated Firewall" OFF \
 						"apache"  	  "Web Server" OFF 3>&1 1>&2 2>&3)
