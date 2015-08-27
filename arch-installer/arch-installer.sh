@@ -89,13 +89,16 @@ set_keys() {
 prepare_drives() {
 	drive=$(lsblk | grep "disk" | grep -v "rom" | awk '{print $1   " "   $4}')
 	DRIVE=$(whiptail --nocancel --title "Arch Linux Installer" --menu "Select the drive you would like to install arch onto:" 15 60 5 $drive 3>&1 1>&2 2>&3)
-	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 4 \
+	PART=$(whiptail --title "Arch Linux Installer" --menu "Select your desired method of partitioning:\nNOTE Auto Partition will format the selected drive" 15 60 5 \
 	"Auto Partition Drive"           "-" \
 	"Auto partition encrypted LVM"   "-" \
 	"Manual Partition Drive"         "-" \
+	"Return To Menu"                 "-" \
 	"Back"                 "-" 3>&1 1>&2 2>&3)
 	if [ "$PART" == "Back" ]; then
 		prepare_drives
+	elif [ "$PART" == "Return To Menu" ]; then
+		main_menu
 	elif [ "$PART" == "Auto partition encrypted LVM" ] || [ "$PART" == "Auto Partition Drive" ]; then
 		if (whiptail --title "Arch Linux Installer" --defaultno --yesno "WARNING! Will erase all data on /dev/$DRIVE! \n Would you like to contunue?" 10 60) then
 			sgdisk --zap-all "$DRIVE"
@@ -811,7 +814,7 @@ main_menu() {
 		"Add User"              "-" \
 		"Configure Network"     "-" \
 		"Install Bootloader"    "-" \
-		"Install Graphics"      "-"
+		"Install Graphics"      "-" \
 		"Install Software"      "-" \
 		"Reboot System"         "-" \
 		"Exit Installer"        "-" 3>&1 1>&2 2>&3)
