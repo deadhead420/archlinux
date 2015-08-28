@@ -45,6 +45,7 @@ set_locale() {
 	"en_AU.UTF-8" "-" \
 	"en_CA.UTF-8" "-" \
 	"en_GB.UTF-8" "-" \
+	"en_MX.UTF-8" "-" \
 	"Other"       "-"		 3>&1 1>&2 2>&3)
 	if [ "$LOCALE" = "Other" ]; then
 		localelist=$(</etc/locale.gen  awk '{print substr ($1,2) " " ($2);}' | grep -F ".UTF-8" | sed "1d" | sed 's/$/  -/g;s/ UTF-8//g')
