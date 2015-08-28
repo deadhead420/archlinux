@@ -108,8 +108,36 @@ prepare_drives() {
 		fi
 		SWAP=false
 		if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 10 60) then
+			d_bytes=$(fdisk -l | grep -w "$DRIVE" | awk '{print $5}')
+			t_bytes=$((d_bytes-2000000000))
 			SWAP=true
-			SWAPSPACE=$(whiptail --nocancel --inputbox "Specify desired swap size \n (Align to M or G):" 10 35 "512M" 3>&1 1>&2 2>&3)
+			while [ !-n "$swapped" ]
+				do
+					SWAPSPACE=$(whiptail --inputbox "Specify desired swap size \n (Align to M or G):" 10 35 "512M" 3>&1 1>&2 2>&3)
+					if [ "$?" -gt "0" ]; then
+						swapped=true
+					fi
+					unit=$(grep -o ".$" <<< "$SWAPSPACE")
+					if [ "$unit" == "M" ]; then
+						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
+						p_bytes=$((unit_size*1000*1000))
+						if [ "$p_bytes" -gt "$t_bytes" ]; then
+							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
+						else
+							swapped=true
+						fi
+					elif [ "$unit" == "G" ]; then
+						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
+						p_bytes=$((unit_size*1000*1000*1000))
+						if [ "$p_bytes" -gt "$t_bytes" ]; then
+							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
+						else
+							swapped=true
+						fi
+					else
+						whiptail --title "Arch Linux Installer" --msgbox "Error setting swap! Be sure it is a number ending in 'M' or 'G'" 10 60
+					fi
+				done
 		fi
 #		UEFI=false
 #		if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Would you like to enable UEFI bios?" 10 60) then
@@ -198,7 +226,7 @@ prepare_drives() {
 				ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==3) print substr ($1,3) }')"
 				
 			fi
-			if (whiptail --title "Arch Linux Installer" --yesno "Warning this will encrypt /dev/$DRIVE \n *Continue?" 10 60) then
+			if (whiptail --title "Arch Linux Installer" --defaultno --yesno "Warning this will encrypt /dev/$DRIVE \n *Continue?" 10 60) then
 				lvm pvcreate /dev/"$ROOT" &> /dev/null
 				lvm vgcreate lvm /dev/"$ROOT" &> /dev/null
 				if "$SWAP" ; then
@@ -209,8 +237,8 @@ prepare_drives() {
     			input=default
 				while [ "$input" != "$input_chk" ]
             		do
-            	    	input=$(whiptail --passwordbox --nocancel "Please enter a new $user password" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
-            	    	input_chk=$(whiptail --passwordbox --nocancel "New $user password again" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+            	    	input=$(whiptail --passwordbox --nocancel "Please enter a new password for /dev/$DRIVE \n *Note this password is used to unencrypt your drive" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+            	    	input_chk=$(whiptail --passwordbox --nocancel "New /dev/$DRIVE password again" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
             	        if [ "$input" != "$input_chk" ]; then
             	        	whiptail --title "Test Message Box" --msgbox "Passwords do not match, please try again." 10 60
             	        fi
