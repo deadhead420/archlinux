@@ -122,21 +122,25 @@ prepare_drives() {
 						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
 						count=$(wc -w <<< $unit_size)
 						p_bytes=$((unit_size*1000*1000))
-						if [ "$p_bytes" -gt "$t_bytes" ] || [ "$count" -gt "5" ]; then
+						if [ "$count" -gt "5" ]; then
 							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
-						else
+						elif [ "$p_bytes" -lt "$t_bytes" ]; then
 							SWAP=true
 							swapped=true
+						else
+							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
 						fi
 					elif [ "$unit" == "G" ]; then
 						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
 						count=$(wc -w <<< $unit_size)
 						p_bytes=$((unit_size*1000*1000*1000))
-						if [ "$p_bytes" -gt "$t_bytes" ] || [ "$count" -gt "5" ]; then
+						if [ "$count" -gt "5" ]; then
 							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
-						else
+						elif [ "$p_bytes" -lt "$t_bytes" ]; then
 							SWAP=true
 							swapped=true
+						else
+							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
 						fi
 					else
 						whiptail --title "Arch Linux Installer" --msgbox "Error setting swap! Be sure it is a number ending in 'M' or 'G'" 10 60
