@@ -197,27 +197,40 @@ prepare_drives() {
 				ROOT="$(lsblk | grep "$DRIVE" |  awk '{ if (NR==3) print substr ($1,3) }')"
 				
 			fi
-			lvm pvcreate /dev/"$ROOT" &> /dev/null
-			lvm vgcreate lvm /dev/"$ROOT" &> /dev/null
-			if "$SWAP" ; then
-				lvm lvcreate -L $SWAPSPACE -n swap lvm &> /dev/null
+			if (whiptail --title "Arch Linux Installer" --yesno "Warning this will encrypt /dev/$DRIVE \n *Continue?" 10 60) then
+				lvm pvcreate /dev/"$ROOT" &> /dev/null
+				lvm vgcreate lvm /dev/"$ROOT" &> /dev/null
+				if "$SWAP" ; then
+					lvm lvcreate -L $SWAPSPACE -n swap lvm &> /dev/null
+				fi
+				lvm lvcreate -L 500M -n tmp lvm &> /dev/null
+				lvm lvcreate -l 100%FREE -n lvroot lvm &> /dev/null
+    			input=default
+				while [ "$input" != "$input_chk" ]
+            		do
+            	    	input=$(whiptail --passwordbox --nocancel "Please enter a new $user password" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+            	    	input_chk=$(whiptail --passwordbox --nocancel "New $user password again" 8 78 --title "Arch Linux Installer" 3>&1 1>&2 2>&3)
+            	        if [ "$input" != "$input_chk" ]; then
+            	        	whiptail --title "Test Message Box" --msgbox "Passwords do not match, please try again." 10 60
+            	        fi
+            	 	done
+				printf "$input" | cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/lvm/lvroot -
+				printf "$input" | cryptsetup open --type luks /dev/lvm/lvroot root -
+				input=""
+				mkfs -q -t ext4 /dev/mapper/root &> /dev/null &
+				pid=$! pri=1 msg="Please wait while creating encrypted filesystem" load
+				mount -t ext4 /dev/mapper/root "$ARCH"
+				if [ "$?" -eq "0" ]; then
+					mounted=true
+					crypted=true
+				fi
+				wipefs -a /dev/"$BOOT"
+				mkfs -q -t ext4 /dev/"$BOOT" &> /dev/null
+				mkdir "$ARCH"/boot
+				mount -t ext4 /dev/"$BOOT" "$ARCH"/boot
+			else
+				prepare_drives
 			fi
-			lvm lvcreate -L 500M -n tmp lvm &> /dev/null
-			lvm lvcreate -l 100%FREE -n lvroot lvm &> /dev/null
-                        clear
-			cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/lvm/lvroot
-			cryptsetup open --type luks /dev/lvm/lvroot root
-			mkfs -q -t ext4 /dev/mapper/root &> /dev/null &
-			pid=$! pri=1 msg="Please wait while creating encrypted filesystem" load
-			mount -t ext4 /dev/mapper/root "$ARCH"
-			if [ "$?" -eq "0" ]; then
-				mounted=true
-				crypted=true
-			fi
-			wipefs -a /dev/"$BOOT"
-			mkfs -q -t ext4 /dev/"$BOOT" &> /dev/null
-			mkdir "$ARCH"/boot
-			mount -t ext4 /dev/"$BOOT" "$ARCH"/boot
 		;;
 		"Manual Partition Drive")
 			$part_tool /dev/"$DRIVE"
@@ -728,7 +741,7 @@ graphics() {
 install_software() {
 	if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
 		if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install some common software?" 10 60) then
-			software=$(whiptail --title "Test Checklist Dialog" --checklist "Choose your desired software \nUse spacebar to check/uncheck \npress enter when finished" 20 60 10 \
+			software=$(whiptail --title "Arch Linux Installer" --checklist "Choose your desired software \nUse spacebar to check/uncheck \npress enter when finished" 20 60 10 \
 						"openssh" "Secure Shell Deamon" ON \
 						"vim" 	  	  "Popular Text Editor" ON \
 						"zsh"     	  "The Z shell" ON \
