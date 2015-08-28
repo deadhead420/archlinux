@@ -111,6 +111,7 @@ prepare_drives() {
 			d_bytes=$(fdisk -l | grep -w "$DRIVE" | awk '{print $5}')
 			t_bytes=$((d_bytes-2000000000))
 			SWAP=true
+			swapped=false
 			while [ "$swapped" != "true" ]
 				do
 					SWAPSPACE=$(whiptail --inputbox "Specify desired swap size \n (Align to M or G):" 10 35 "512M" 3>&1 1>&2 2>&3)
