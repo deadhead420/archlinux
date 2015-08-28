@@ -110,7 +110,6 @@ prepare_drives() {
 		if (whiptail --title "Arch Linux Installer" --yesno "Create SWAP space?" 10 60) then
 			d_bytes=$(fdisk -l | grep -w "$DRIVE" | awk '{print $5}')
 			t_bytes=$((d_bytes-2000000000))
-			SWAP=true
 			swapped=false
 			while [ "$swapped" != "true" ]
 				do
@@ -121,18 +120,22 @@ prepare_drives() {
 					unit=$(grep -o ".$" <<< "$SWAPSPACE")
 					if [ "$unit" == "M" ]; then
 						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
+						count=$(wc -w <<< $unit_size)
 						p_bytes=$((unit_size*1000*1000))
-						if [ "$p_bytes" -gt "$t_bytes" ]; then
+						if [ "$p_bytes" -gt "$t_bytes" ] || [ "$count" -gt 5 ]; then
 							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
 						else
+							SWAP=true
 							swapped=true
 						fi
 					elif [ "$unit" == "G" ]; then
 						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
+						count=$(wc -w <<< $unit_size)
 						p_bytes=$((unit_size*1000*1000*1000))
-						if [ "$p_bytes" -gt "$t_bytes" ]; then
+						if [ "$p_bytes" -gt "$t_bytes" ] || [ "$count" -gt 5 ]; then
 							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
 						else
+							SWAP=true
 							swapped=true
 						fi
 					else
