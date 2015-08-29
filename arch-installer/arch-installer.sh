@@ -120,11 +120,8 @@ prepare_drives() {
 					unit=$(grep -o ".$" <<< "$SWAPSPACE")
 					if [ "$unit" == "M" ]; then
 						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
-						count=$(wc -w <<< $unit_size)
 						p_bytes=$((unit_size*1000*1000))
-						if [ "$count" -gt "5" ]; then
-							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
-						elif [ "$p_bytes" -lt "$t_bytes" ]; then
+						if [ "$p_bytes" -lt "$t_bytes" ]; then
 							SWAP=true
 							swapped=true
 						else
@@ -132,11 +129,8 @@ prepare_drives() {
 						fi
 					elif [ "$unit" == "G" ]; then
 						unit_size=$(grep -o '[0-9]*' <<< "$SWAPSPACE")
-						count=$(wc -w <<< $unit_size)
 						p_bytes=$((unit_size*1000*1000*1000))
-						if [ "$count" -gt "5" ]; then
-							whiptail --title "Arch Linux Installer" --msgbox "Error not enough space on drive!" 10 60
-						elif [ "$p_bytes" -lt "$t_bytes" ]; then
+						if [ "$p_bytes" -lt "$t_bytes" ]; then
 							SWAP=true
 							swapped=true
 						else
@@ -555,84 +549,85 @@ graphics() {
 	if [[ "$INSTALLED" == "true" && "$loader_installed" == "true" ]]; then
 		if [ "$x" != "true" ]; then
 			if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install xorg-server now? \n *Select yes for a graphical interface" 10 60) then
-				pacstrap "$ARCH" xorg-server xorg-server-utils xorg-xinit xterm &> /dev/null &
+				pacstrap "$ARCH" xorg-server xorg-server-utils mesa xorg-xinit xterm &> /dev/null &
 				pid=$! pri="$down" msg="Please wait while installing xorg-server..." load
 				x=true
-				until [ "$GPU" == "set" ]
-					do
-						GPU=$(whiptail --title "Arch Linux Installer" --menu "Select your GPU" 15 60 5 \
-						"Default" "Mesa Graphics" \
-						"AMD"     "AMD/ATI Graphics" \
-						"Intel"   "Intel Graphics" \
-						"Nvidia"  "NVIDIA Graphics" \
-						"VBOX"    "VirtualBox Guest" 3>&1 1>&2 2>&3)
-						if [ "$?" -gt "0" ]; then
-							if (whiptail --title "Arch Linux Installer" --yesno "Continue without installing graphics drivers? \n Default mesa drivers will be used" 10 60) then
-								GPU=set
+				if (whiptail --title "Arch Linux Installer" --yesno "Would you like to install graphics drivers now? If no default mesa drivers will be used." 10 60) then
+					until [ "$GPU" == "set" ]
+						do
+							GPU=$(whiptail --title "Arch Linux Installer" --menu "Select your GPU" 15 60 5 \
+							"AMD"     "AMD/ATI Graphics" \
+							"Intel"   "Intel Graphics" \
+							"Nvidia"  "NVIDIA Graphics" \
+							"VBOX"    "VirtualBox Guest" 3>&1 1>&2 2>&3)
+							if [ "$?" -gt "0" ]; then
+								if (whiptail --title "Arch Linux Installer" --yesno "Continue without installing graphics drivers? \n Default mesa drivers will be used" 10 60) then
+									GPU=set
+								fi
 							fi
-						fi
-						case "$GPU" in
-							"Default")
-								GPU=set
-							;;
-							"AMD")
-								DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired AMD driver \n Cancel if none" 15 60 4 \
-								"xf86-video-ati"   "Open source AMD driver" 3>&1 1>&2 2>&3)
-								if [ "$?" -eq "0" ]; then
-									if [ "$multilib" == "true" ]; then
-										query="xf86-video-ati lib32-mesa-libgl"
-									else
-										query="xf86-video-ati"
-									fi
-									if (whiptail --title "Arch Linux Installer" --yesno "Enable openGL support? \n Used for games and other graphics" 10 60) then
-										query="$query mesa-libgl"
-									fi
+							case "$GPU" in
+								"Default")
 									GPU=set
-								fi
-							;;
-							"Intel")
-								DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired Intel driver \n Cancel if none" 15 60 4 \
-								"xf86-video-intel"     "Open source Intel driver" 3>&1 1>&2 2>&3)
-								if [ "$?" -eq "0" ]; then
-									if [ "$multilib" == "true" ]; then
-										query="xf86-video-intel lib32-mesa-libgl"
-									else
-										query="xf86-video-intel"
+								;;
+								"AMD")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired AMD driver \n Cancel if none" 15 60 4 \
+									"xf86-video-ati"   "Open source AMD driver" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										if [ "$multilib" == "true" ]; then
+											query="xf86-video-ati lib32-mesa-libgl"
+										else
+											query="xf86-video-ati"
+										fi
+										if (whiptail --title "Arch Linux Installer" --yesno "Enable openGL support? \n Used for games and other graphics" 10 60) then
+											query="$query mesa-libgl"
+										fi
+										GPU=set
 									fi
-									if (whiptail --title "Arch Linux Installer" --yesno "Enable openGL support? \n Used for games and other graphics" 10 60) then
-										query="$query mesa-libgl"
+								;;
+								"Intel")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired Intel driver \n Cancel if none" 15 60 4 \
+									"xf86-video-intel"     "Open source Intel driver" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										if [ "$multilib" == "true" ]; then
+											query="xf86-video-intel lib32-mesa-libgl"
+										else
+											query="xf86-video-intel"
+										fi
+										if (whiptail --title "Arch Linux Installer" --yesno "Enable openGL support? \n Used for games and other graphics" 10 60) then
+											query="$query mesa-libgl"
+										fi
+										GPU=set
 									fi
-									GPU=set
-								fi
-							;;
-							"Nvidia")
-								DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired Intel driver \n Cancel if none" 15 60 4 \
-								"nvidia"       "Latest stable nvidia" \
-								"nvidia-340xx" "Legacy 340xx branch" \
-								"nvidia-304xx" "Legaxy 304xx branch" 3>&1 1>&2 2>&3)
-								if [ "$?" -eq "0" ]; then
-									if [ "$multilib" == "true" ]; then
-										query="$DRIV $DRIV-libgl lib32-$DRIV-libgl $DRIV-utils lib32-$DRIV-utils"
-									else
-										query="$DRIV $DRIV-libgl $DRIV-utils"
+								;;
+								"Nvidia")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Select your desired Intel driver \n Cancel if none" 15 60 4 \
+									"nvidia"       "Latest stable nvidia" \
+									"nvidia-340xx" "Legacy 340xx branch" \
+									"nvidia-304xx" "Legaxy 304xx branch" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										if [ "$multilib" == "true" ]; then
+											query="$DRIV $DRIV-libgl lib32-$DRIV-libgl $DRIV-utils lib32-$DRIV-utils"
+										else
+											query="$DRIV $DRIV-libgl $DRIV-utils"
+										fi
+										GPU=set
 									fi
-									GPU=set
-								fi
-							;;
-							"VBOX")
-								DRIV=$(whiptail --title "Arch Linux Installer" --menu "Provides graphics and features for virtualbox guests:" 15 60 4 \
-								"virtualbox-guest-additions" "-" 3>&1 1>&2 2>&3)
-								if [ "$?" -eq "0" ]; then
-									query="virtualbox-guest-utils"
-									echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/vbox.conf
-									GPU=set
-								fi
-							;;
-						esac
-					done
-				if [ -n "$query" ]; then
-					pacstrap "$ARCH" ${query} &> /dev/null &
-					pid=$! pri=1 msg="Please wait while installing graphics drivers..." load
+								;;
+								"VBOX")
+									DRIV=$(whiptail --title "Arch Linux Installer" --menu "Provides graphics and features for virtualbox guests:" 15 60 4 \
+									"virtualbox-guest-additions" "-" 3>&1 1>&2 2>&3)
+									if [ "$?" -eq "0" ]; then
+										query="virtualbox-guest-utils"
+										echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/vbox.conf
+										GPU=set
+									fi
+								;;
+							esac
+						done
+					if [ -n "$query" ]; then
+						pacstrap "$ARCH" ${query} &> /dev/null &
+						pid=$! pri=1 msg="Please wait while installing graphics drivers..." load
+					fi
 				fi
 			fi
 		fi
