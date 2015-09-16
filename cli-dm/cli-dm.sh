@@ -9,7 +9,8 @@ if [ -n "$x_chk" ]; then
 	echo "${Red}ERROR! Xorg is already running!"
 	exit 1
 fi
-echo -e "${Yellow}\nWelcome to the Command Line Interface Display Manager!\n\nPlease select your desired enviornment:\n\n${Green}(1)Awesome\n(2) Gnome\n"
+clear
+echo -e "${Yellow}\nWelcome to the Command Line Interface Display Manager!\n\nPlease select your desired enviornment:\n\n${Green}(1) Awesome\n(2) Gnome\n"
 echo -n "${Yellow}[1,2,3...]: "
 read input
 if [ "$input" == "1" ]; then
