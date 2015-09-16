@@ -20,7 +20,7 @@ else
 	echo "*sudo not detected* it is recommended to use sudo for administration from a user account."
 	echo
 	echo "To install cli-dm please provide the root password"
-	su -c 'wget -O - https://raw.githubusercontent.com/deadhead420/archlinux/master/wiki/installer.sh | sh'
+	su -c 'wget -O - https://raw.githubusercontent.com/deadhead420/archlinux/master/cli-dm/installer.sh | sh'
 fi
 }
 root_account
