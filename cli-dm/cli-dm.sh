@@ -13,13 +13,11 @@ echo -e "${Yellow}\nWelcome to the Command Line Interface Display Manager!\n\nPl
 echo -n "${Yellow}[1,2,3...]: "
 read input
 if [ "$input" == "1" ]; then
-:
-#	echo "exec awesome" > ~/.xinitrc
+	echo "exec awesome" > ~/.xinitrc
 elif [ "$input" == "2" ]; then
-:
-#	echo "exec gnome-session" > ~/.xinitrc
+	echo "exec gnome-session" > ~/.xinitrc
 else
 	echo "${Red}ERROR please enter then number for your enviornment${ColorOff}"
 	exit 1
 fi
-#startx
+startx
