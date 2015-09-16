@@ -11,7 +11,7 @@ if [ -n "$x_chk" ]; then
 fi
 clear
 echo -e "${Yellow}\nWelcome to the Command Line Interface Display Manager!\n\nPlease select your desired enviornment:\n\n${Green}(1) Awesome\n(2) Gnome\n"
-echo -n "${Yellow}[1,2,3...]: "
+echo -n "${Yellow}[1,2,3...]: ${ColorOff}"
 read input
 if [ "$input" == "1" ]; then
 	echo "exec awesome" > ~/.xinitrc
