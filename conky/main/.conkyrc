@@ -1,0 +1,133 @@
+# Conky settings #
+background no
+update_interval 1
+
+cpu_avg_samples 2
+net_avg_samples 2
+
+override_utf8_locale yes
+
+double_buffer yes
+no_buffers yes
+
+text_buffer_size 2048
+#imlib_cache_size 0
+
+temperature_unit celsius
+
+# Window specifications #
+own_window_class Conky
+own_window yes
+own_window_type normal
+own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+own_window_title 
+own_window_argb_visual true
+own_window_argb_value 0
+own_window_transparent yes
+
+
+border_inner_margin 0
+border_outer_margin 0
+
+minimum_size 520 1020
+maximum_width 820
+
+alignment tr
+gap_x 5
+gap_y 25
+
+# Graphics settings #
+draw_shades no
+draw_outline no
+draw_borders no
+draw_graph_borders no
+
+default_color gray
+default_shade_color red
+default_outline_color green
+
+# Text settings #
+use_xft yes
+override_utf8_locale yes
+xftfont Play:bold:size=9
+xftalpha 0.9
+uppercase no
+
+default_color ffffff
+color0 653A65
+color1 cc0000
+color2 653A65
+
+color3 7e7e7e
+#color4 7e7e7e
+#color5 acd372
+#color6 32cd32
+#color7 0091bd
+#color8 004B80
+#color9 ffffff
+#color3 1994D1
+
+# Lua Load  ##${voffset 750}
+lua_load ./.conkyrings
+#lua_draw_hook_pre ring_stats
+lua_draw_hook_pre conky_main
+
+TEXT
+${font Michroma:size=18}${color0}${voffset 0}${alignr 65} ARCH${color3} LINUX${font conkysymbols:size=20}A${font Michroma:size=18}${color2}${machine}
+${font Play:bold:size=9}${voffset -17}${color3}${goto 
+220}${freq_g cpu0}${color3} Ghz ${alignr 
+193}${color2}${hwmon 3 temp 1} °C
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 0 ${alignr 200}${color2}${cpu cpu0}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 1${alignr 200}${color2}${cpu cpu1}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 2${alignr 200}${color2}${cpu cpu2}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 3${alignr 200}${color2}${cpu cpu3}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 4${alignr 200}${color2}${cpu cpu4}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 5${alignr 200}${color2}${cpu cpu5}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 6${alignr 200}${color2}${cpu cpu6}%
+${font Play:bold:size=9}${voffset 1}${goto 220}${color3}CPU 7${alignr 200}${color2}${cpu cpu7}%
+${goto 150}${voffset -2}${font Play:bold:size=9}${color3}${top name 1}${alignr 170}${color2}${top cpu 1}%
+${goto 150}${font Play:bold:size=9}${color3}${top name 2}${alignr 170}${color2}${top cpu 2}%
+${goto 150}${font Play:bold:size=9}${color3}${top name 3}${alignr 170}${color2}${top cpu 3}%
+${font conkysymbols:size=80}${color0}${goto 102}${voffset -180}T${color3}${goto 104}${voffset 3}T${color2}${goto 107}${voffset 1}T
+${font conkysymbols:size=18}${color0}${goto 117}${voffset -90}F${color3}${goto 116}${voffset 3}F${color2}${goto 118}${voffset 1}F
+${font Michroma:size=12}${color2}${goto 145}${voffset -35}CPU
+${font Play:bold:size=9}${color3}${goto 120}${voffset 160}GPU${color2}${alignr 305}${nvidia gpufreq}Mhz
+${font Play:bold:size=9}${color3}${goto 120}${voffset 1}MEM${color2}${alignr 305}${nvidia memfreq}Mhz
+${font Play:bold:size=9}${color3}${goto 120}${voffset 1}Temp${color2}${alignr 305}${nvidia temp}  °C
+${font Michroma:size=12}${color2}${goto 120}${voffset 5}GPU${font conkysymbols:size=18}${color0}${goto 179}${voffset 1}N${color3}${goto 178}${voffset 1}N${color2}${goto 180}${voffset 1}N
+${font conkysymbols:size=18}${color0}${goto 332}${voffset 30}J${color3}${goto 331}${voffset 3}J${color2}${goto 333}${voffset 1}J
+${font Michroma:size=12}${color2}${goto 355}${voffset -28}MEMORY
+${goto 324}${voffset -10}${font Play:bold:size=9}${color3}${top_mem name 1}${alignr 10}${color2}${top_mem mem 1}%
+${goto 324}${font Play:bold:size=9}${color3}${top_mem name 2}${alignr 10}${color2}${top_mem mem 2}%
+${goto 324}${font Play:bold:size=9}${color3}${top_mem name 1}${alignr 10}${color2}${top_mem mem 3}%
+${font Play:bold:size=9}${voffset 5}${goto 343}${color3}SWAP${alignr 10}${color3}${swap} / ${color2}${swapmax}
+${font Play:bold:size=9}${voffset 4}${goto 343}${color3}RAM ${alignr 10}${color3}${mem} / ${color2}${memmax}
+${font Play:bold:size=9}${goto 50}${color3}${voffset -74}Root${color3}${alignr 305}${fs_used /} / ${color2}${fs_size /}
+${font Play:bold:size=9}${goto 50}${color3}${voffset 0}Home${alignr 305}${color3}${fs_used /home/deadhead} / ${color2}${fs_size /home/deadhead}
+${font Play:bold:size=9}${goto 50}${color3}${voffset 0}Storage${alignr 305}${color3}${fs_used /home/deadhead/Storage} / ${color2}${fs_size 
+/home/deadhead/Storage}
+${font conkysymbols:size=18}${color0}${goto 25}${voffset 2}K${color3}${goto 22}${voffset 1}K${color2}${goto 24}K
+${font Michroma:size=12}${color2}${goto 50}${voffset -38}HARD  DRIVE
+${font conkysymbols:size=18}${color0}${goto 279}${voffset 46}B${color3}${goto 278}${voffset 1}B${color2}${goto 280}${voffset 1}B
+${font Michroma:size=12}${color2}${voffset -27}${goto 310}INTERNET  INFO
+# EDITION FINIR WLAN
+#${if_existing /proc/net/route wlan0}${font Play:bold:size=21}${color2}${alignr 24}${voffset -8}WiFi  ${color2}${wireless_essid wlan0}
+#${font Play:bold:size=9}${color2}${goto 298}${voffset -2}Up${goto 370}${color2}${totalup wlan0} / ${color2}${upspeed wlan0}
+#${font Play:bold:size=9}${goto 298}${color2}Down${goto 370}${color2}${totaldown wlan0} / ${color2}${downspeed wlan0}
+#${font Play:bold:size=9}${goto 300}${voffset -2}Local IP${goto 370}${addr wlan0}
+#${font Play:bold:size=9}${goto 300}${voffset -3}Public IP${goto 370}${execi 3600 wget -q -O - checkip.dyndns.org | sed -e 's/[^[:digit:]\|.]//g'}
+#${font Michroma:size=12}${goto 90}${voffset -37}${color0}${time %a} ${color0}${time %x}
+#${font Michroma:size=24}${goto 118}${color2}${voffset -9}${time %H}:${time %M}
+#${font Michroma:size=12}${color0}${goto 296}${voffset 18}BATTERIE
+#${font Play:size=9}${color0}${goto 278}${voffset 5}${color2}${battery_percent BAT1}%
+# |--enp3s0
+#${else}
+${if_existing /proc/net/route enp3s0}${font Play:bold:size=9}${color3}${goto 298}${voffset -6}Up${goto 370}${color3}${totalup enp3s0} / ${color2}${upspeed enp3s0}
+${font Play:bold:size=9}${goto 298}${color3}Down${goto 370}${color3}${totaldown enp3s0} / ${color2}${downspeed enp3s0}
+${font Play:bold:size=9}${goto 300}${color3}${voffset 2}Local IP${goto 370}${color2}${addr enp3s0}
+${font Play:bold:size=9}${goto 300}${color3}${voffset 1}Public IP${goto 370}${color2}${execi 3600 wget -q -O - checkip.dyndns.org | sed -e 's/[^[:digit:]\|.]//g'}
+${font Michroma:size=12}${alignr 295}${voffset -54}${color0}${time %a} ${color3}${time %x}
+${font Michroma:size=18}${goto 128}${color2}${voffset -7}${time %H}:${time %M}
+#${font Play:bold:size=9}${goto 180}Uptime${color2}${alignr 70}${uptime_short}
+${font conkysymbols:size=24}${color0}${goto 92}${voffset -30}I${color3}${goto 89}${voffset 1}I${color2}${goto 91}${voffset 1}I
+#${execpi 53 $HOME/conky/nagios.sh}

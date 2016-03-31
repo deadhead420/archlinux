@@ -1,0 +1,53 @@
+# — Conky settings — #
+background no
+update_interval 1
+
+double_buffer yes
+no_buffers yes
+
+text_buffer_size 2048
+imlib_cache_size 0
+
+# — Window specifications — #
+
+own_window yes
+own_window_type normal
+own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+own_window_title 
+own_window_argb_visual true
+own_window_argb_value 0
+own_window_transparent yes
+
+
+minimum_size 260 328
+
+alignment tl
+
+# — Placement — #
+gap_x 20
+gap_y 40
+
+# — Graphics settings — #
+draw_shades no
+draw_outline no
+draw_borders no
+draw_graph_borders no
+# — Text settings — #
+use_xft yes
+xftfont droid sans:size=8.5
+xftalpha 1
+
+uppercase no
+
+default_color 696969
+color1 8C8396
+color2 212121
+
+#mpd host\port
+mpd_host localhost
+mpd_port 6600
+
+TEXT
+${if_match "$mpd_status" == "Playing"}${voffset 258}${image ~/.conky/mpd-conky/case.png -p -13,267}${image ~/.conky/mpd-conky/cover.jpg -p 0,-3 -s 285x285}$else${if_match "$mpd_status" == "Paused"}${voffset 258}${image ~/.conky/mpd-conky/case.png -13,267}${image ~/.conky/mpd-conky/cover.jpg -p 0,-3 -s 285x285}$else${if_match "$mpd_status" == "Stopped"}${voffset 258}${image ~/.conky/mpd-conky/case.png -p -13,267}${image ~/.conky/mpd-conky/cover.jpg -p 0,-3 -s 285x285}$endif$endif$endif
+${voffset 9}${goto 15}${if_mpd_playing}${font Play:size=10}${mpd_artist}${font}
+${voffset 5}${goto 30}${if_match ${execi 5 expr length "`mpc --format %title% | head -n 1`"} >= 35}${scroll 25 5 ${mpd_title}}${else}${mpd_title}${endif}${voffset 19}${goto 0}${color1}${mpd_bar 4,290}${color}${endif}${voffset -22}${goto 200}${font Play:size=10}${mpd_elapsed}${goto 245}${mpd_length}${font}${voffset -6}${goto 232}${color1}${font Play:size=14}/${font}${color}
