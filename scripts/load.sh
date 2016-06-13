@@ -21,24 +21,24 @@ load_log() {
 		pri=$(<<<"$pri" sed 's/\..*$//') 	# $pri may be a float remove anything after '.' just in case
 		pri=$((pri*2)) 				# times pri by two (the loop goes around once every .5 seconds times pri by two to account)
 		while (true) 				# Start while true loop
-    	    do
-    	        proc=$(ps | grep "$pid") 		# Frist check if process $pid is still running
-    	        if [ "$?" -gt "0" ]; then break; fi 	# If exit is greater than 0 process is no longer running break from loop
-    	        sleep 0.5 				# sleep for .5 seconds
-    	        if [ "$pos" -eq "$pri" ]; then 		# check if loop has gone around enought to equal $pri seconds
-    	        	pos=0 				# reset pos to zero if it is equal
-    	        	if [ "$int" -lt "100" ]; then 	# if loading bar is not 100
-    	        		int=$((int+1)) 		# add one to loading bar
+    		 do
+    	        	proc=$(ps | grep "$pid") 		# Frist check if process $pid is still running
+    	        	if [ "$?" -gt "0" ]; then break; fi 	# If exit is greater than 0 process is no longer running break from loop
+    	        	sleep 0.5 				# sleep for .5 seconds
+    	        	if [ "$pos" -eq "$pri" ]; then 		# check if loop has gone around enought to equal $pri seconds
+    	        		pos=0 				# reset pos to zero if it is equal
+    	        		if [ "$int" -lt "100" ]; then 	# if loading bar is not 100
+    	        			int=$((int+1)) 		# add one to loading bar
+    	        		fi
     	        	fi
-    	        fi
-				log=$(tail -n 1 "$tmpfile" | sed 's/\.//g') 	# tail log for output here I use sed to remove '.' from wget command
-#    	        log=$(tail -n 1 "$tmpfile" | sed 's/.pkg.tar.xz//') 		# here I remove '.pkg.tar.xz' from pacstrap output
-    	        echo "$int" 							# echo $int (this is what is displayed as guage percentage)
-    	        echo -e "XXX$msg \n \Z1> \Z2$log\Zn\nXXX" 			# echo -e start XXX insert $msg and $log then XXX to end
-    	        pos=$((pos+1)) 							# increase pos by 1 every .5 seconds (meaning it will equal int*2 when it is time to increase $int
-    	    done
-            echo 100 # When loop is finished echo 100 and sleep 1
-            sleep 1
+			log=$(tail -n 1 "$tmpfile" | sed 's/\.//g') 	# tail log for output here I use sed to remove '.' from wget command
+#    	        	log=$(tail -n 1 "$tmpfile" | sed 's/.pkg.tar.xz//') 		# here I remove '.pkg.tar.xz' from pacstrap output
+    	        	echo "$int" 							# echo $int (this is what is displayed as guage percentage)
+    	        	echo -e "XXX$msg \n \Z1> \Z2$log\Zn\nXXX" 			# echo -e start XXX insert $msg and $log then XXX to end
+    	        	pos=$((pos+1)) 							# increase pos by 1 every .5 seconds (meaning it will equal int*2 when it is time to increase $int
+    	    	done
+            	echo 100 # When loop is finished echo 100 and sleep 1
+            	sleep 1
 	} | dialog --colors --gauge "$msg" 10 79 0
 
 }
