@@ -28,16 +28,16 @@ mount /dev/sda1 /mnt/boot
 
 pacstrap /mnt base base-devel grub efibootmgr # Install base system 
 
-arch-chroot /mnt grub-install --efi-directory=/boot --target=x86_64-efi --bootloader-id=boot # Install grub in efi mode
-mv /mnt/boot/EFI/boot/grubx64.efi /mnt/boot/EFI/boot/bootx64.efi 								# Rename efi file (this is needed for vritualbox)
-arch-chroot /mnt mkinitcpio -p linux 															# Reconfigure kernel (Not sure if this is necessary)
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg											# Configure grub
+arch-chroot /mnt grub-install --efi-directory=/boot --target=x86_64-efi --bootloader-id=boot 	# Install grub in efi mode
+mv /mnt/boot/EFI/boot/grubx64.efi /mnt/boot/EFI/boot/bootx64.efi 				# Rename efi file (this is needed for vritualbox)
+arch-chroot /mnt mkinitcpio -p linux 								# Reconfigure kernel (Not sure if this is necessary)
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg						# Configure grub
 
 genfstab -U -p /mnt >> /mnt/etc/fstab		# Generate fstab
 cp /etc/locale.gen /mnt/etc/ 			# Copy over locale gen file
 arch-chroot /mnt locale-gen			# Generate locale on new system
 printf "arch\narch" | arch-chroot /mnt passwd	# Set root password default as "arch"
-echo -e "\nDefault password set to: arch\n"
+echo -e "\nDefault root password set to: arch\n"
 
 # Prompt user for reboot
 echo -n "Install complete, reboot now? [y/n]: "
