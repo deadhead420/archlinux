@@ -9,14 +9,14 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
+# Define alias 
 alias screenfetch="screenfetch | lolcat"
 alias gcal="gcal . | lolcat"
 alias cl="clear"
 alias vi="vim"
 alias weather="curl http://wttr.in/hendersonville"
-alias gaa="cd /home/deadhead/Git-Repos/arch-linux-anywhere"
-alias aa="cd ~/arch-linux-anywhere"
-
+alias tmux="TERM=xterm-256color tmux"
+alias calc='python -ic "from __future__ import division; from math import *; from random import *"'
 autoload -U promptinit && promptinit
 
 # Path to your oh-my-zsh installation.
@@ -26,7 +26,8 @@ export ZSH=/usr/share/oh-my-zsh
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="funky"
+#ZSH_THEME="random"
+ZSH_THEME="gnzh"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -92,16 +93,6 @@ source $ZSH/oh-my-zsh.sh
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-#
+# Source plugins
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
