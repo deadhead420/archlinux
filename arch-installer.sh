@@ -50,7 +50,7 @@ if [ "$?" -gt "0" ]; then
 	exit 1
 fi
 
-echo -e "\nBegining Arch Linux install to /dev/$part"
+echo -e "\nBegining Arch Linux install to /dev/$part\n"
 pacstrap /mnt base base-devel grub
 
 if [ "$?" -gt "0" ]; then
@@ -61,9 +61,10 @@ fi
 echo -e "\nGenerating fstab..."
 genfstab -U -p /mnt >> /mnt/etc/fstab
 
-grub_part=$(<<<"$part" | grep -o "sd.")
+grub_part=$(echo "$part" | grep -o "sd.")
 echo -e "\nInstalling grub..."
 arch-chroot /mnt grub-install --recheck /dev/$grub_part
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo -e "\nSet and generate locale"
 echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
@@ -80,6 +81,7 @@ echo "$hostname" > /mnt/etc/hostname
 while (true) ; do
 	echo -en "\nEnter a new root password: "
 	read -s password
+	echo
 	echo -en "Confirm root password: "
 	read -s password_confirm
 
@@ -92,13 +94,15 @@ while (true) ; do
 	fi
 done
 
-echo -en "\nEnter a new username: "
+echo
+echo -en "Enter a new username: "
 read username
 arch-chroot /mnt useradd -m -g users -G wheel,power,audio,video,storage -s /bin/bash "$username"
 
 while (true) ; do
 	echo -en "\nEnter a new password for $username: "
 	read -s password
+	echo
 	echo -en "Confirm $username password: "
 	read -s password_confirm
 
