@@ -2,8 +2,13 @@
 
 main() {
 
-	if [ -f ~/.dshrc ]; then source ~/.dshrc
-	else source /etc/dsh.dshrc ; fi
+	Cyan=$'\e[0;36m';
+	Magenta=$'\e[0;35m';
+	Blue=$'\e[0;34m';
+	Yellow=$'\e[0;33m';
+	Green=$'\e[0;32m';
+	Red=$'\e[0;31m';
+	ColorOff=$'\e[0m';
 	clear
 	local char=
     local input=
