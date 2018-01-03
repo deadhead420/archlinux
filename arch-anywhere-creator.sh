@@ -14,7 +14,7 @@ update=false
 
 # Check depends
 
-if [ ! -f /usr/bin/7z ] || [ ! -f /usr/bin/mksquashfs ] || [ ! -f /usr/bin/xorriso ] || [ ! -f /usr/bin/wget ] || [ ! -f /usr/bin/arch-chroot ] || [ ! -f /usr/bin/xxd ]; then
+if [ ! -f /usr/bin/gtk3-demo ] || [ ! -f /usr/bin/7z ] || [ ! -f /usr/bin/mksquashfs ] || [ ! -f /usr/bin/xorriso ] || [ ! -f /usr/bin/wget ] || [ ! -f /usr/bin/arch-chroot ] || [ ! -f /usr/bin/xxd ]; then
 	depends=false
 	until "$depends"
 	  do
@@ -24,12 +24,13 @@ if [ ! -f /usr/bin/7z ] || [ ! -f /usr/bin/mksquashfs ] || [ ! -f /usr/bin/xorri
 
 		case "$input" in
 			y|Y|yes|Yes|yY|Yy|yy|YY)
-				if [ ! -f "/usr/bin/wget" ]; then query="wget"; fi
-				if [ ! -f /usr/bin/xorriso ]; then query="$query libisoburn"; fi
-				if [ ! -f /usr/bin/mksquashfs ]; then query="$query squashfs-tools"; fi
-				if [ ! -f /usr/bin/7z ]; then query="$query p7zip" ; fi
-				if [ ! -f /usr/bin/arch-chroot ]; then query="$query arch-install-scripts"; fi
-				if [ ! -f /usr/bin/xxd ]; then query="$query xxd"; fi
+				if [ ! -f "/usr/bin/wget" ]; then query="wget "; fi
+				if [ ! -f /usr/bin/xorriso ]; then query+="libisoburn "; fi
+				if [ ! -f /usr/bin/mksquashfs ]; then query+="squashfs-tools "; fi
+				if [ ! -f /usr/bin/7z ]; then query+="p7zip " ; fi
+				if [ ! -f /usr/bin/arch-chroot ]; then query+="arch-install-scripts "; fi
+				if [ ! -f /usr/bin/xxd ]; then query+="xxd "; fi
+                if [ ! -f /usr/bin/gtk3-demo ]; then query+="gtk3 "; fi
 				sudo pacman -Syy $(echo "$query")
 				depends=true
 			;;
@@ -61,7 +62,7 @@ if [ "$iso_ver" != "$iso" ]; then
 	if [ -z "$iso" ]; then
 		echo -en "\nNo archiso found under $aa\nWould you like to download now? [y/N]: "
 		read input
-    
+
 		case "$input" in
 			y|Y|yes|Yes|yY|Yy|yy|YY) update=true
 			;;
@@ -72,7 +73,7 @@ if [ "$iso_ver" != "$iso" ]; then
 	else
 		echo -en "An updated verison of the archiso is available for download\n'$iso_ver'\nDownload now? [y/N]: "
 		read input
-		
+
 		case "$input" in
 			y|Y|yes|Yes|yY|Yy|yy|YY) update=true
 			;;
@@ -81,7 +82,7 @@ if [ "$iso_ver" != "$iso" ]; then
 			;;
 		esac
 	fi
-	
+
 	if "$update" ; then
 		cd "$aa"
 		wget "$archiso_link"
@@ -94,11 +95,11 @@ if [ "$iso_ver" != "$iso" ]; then
 fi
 
 init() {
-	
+
 	if [ -d "$customiso" ]; then
 		sudo rm -rf "$customiso"
 	fi
-	
+
 	# Extract archiso to mntdir and continue with build
 	7z x "$iso" -o"$customiso"
 	prepare_sys
@@ -106,17 +107,17 @@ init() {
 }
 
 prepare_sys() {
-	
+
 	sys=x86_64
 
 	while (true)
-	  do	
+	  do
 	### Change directory into the ISO where the filesystem is stored.
 	### Unsquash root filesystem 'airootfs.sfs' this creates a directory 'squashfs-root' containing the entire system
 		echo "Preparing $sys"
 		cd "$customiso"/arch/"$sys"
 		sudo unsquashfs airootfs.sfs
-	
+
 	########################################## Start changes here
 
 	### To install packages onto customiso uncomment and use the following commands (#1 install #2 update package list #3 clean customiso cache)
@@ -124,7 +125,7 @@ prepare_sys() {
 #		sudo pacman --root squashfs-root --cachedir squashfs-root/var/cache/pacman/pkg  --config squashfs-root/etc/pacman.conf -Sl | awk '/\[installed\]$/ {print $1 "/" $2 "-" $3}' > "$customiso"/arch/pkglist.${sys}.txt
 #		sudo pacman --root squashfs-root --cachedir squashfs-root/var/cache/pacman/pkg  --config squashfs-root/etc/pacman.conf --noconfirm -Scc
 #		sudo rm -f "$customiso"/arch/"$sys"/squashfs-root/var/cache/pacman/pkg/*
-	
+
 
 	### Copy any files you would like over to custom iso like so:
 #		sudo cp "$aa"/etc/file_to_copy.txt "$customiso"/arch/"$sys"/squashfs-root/etc
@@ -143,7 +144,7 @@ prepare_sys() {
 		sudo mksquashfs squashfs-root airootfs.sfs -b 1024k -comp xz
 		sudo rm -r squashfs-root
 		md5sum airootfs.sfs > airootfs.md5
-	
+
 		if [ "$sys" == "i686" ]; then break ; fi
 		sys=i686
 	done
@@ -153,13 +154,13 @@ prepare_sys() {
 }
 
 configure_boot() {
-	
+
 	archiso_label=$(<"$customiso"/loader/entries/archiso-x86_64.conf awk 'NR==5{print $NF}' | sed 's/.*=//')
 	archiso_hex=$(<<<"$archiso_label" xxd -p)
 	iso_hex=$(<<<"$iso_label" xxd -p)
 	cp "$aa"/boot/iso/archiso_head.cfg "$customiso"/arch/boot/syslinux
 	sed -i "s/$archiso_label/$iso_label/" "$customiso"/loader/entries/archiso-x86_64.conf
-	sed -i "s/$archiso_label/$iso_label/" "$customiso"/arch/boot/syslinux/archiso_sys64.cfg 
+	sed -i "s/$archiso_label/$iso_label/" "$customiso"/arch/boot/syslinux/archiso_sys64.cfg
 	sed -i "s/$archiso_label/$iso_label/" "$customiso"/arch/boot/syslinux/archiso_sys32.cfg
 	cd "$customiso"/EFI/archiso/
 	echo -e "Replacing label hex in efiboot.img...\n$archiso_label $archiso_hex > $iso_label $iso_hex"
