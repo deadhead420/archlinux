@@ -26,7 +26,7 @@ set_version() {
 	case "$interface" in
 		cli)	export version="anarchy-cli-${iso_rel}-x86_64.iso"
 		;;
-		gui)	export version="anarchy-${iso_rel}-x86_64.iso"
+		gui)	export version="anarchy-gnome-${iso_rel}-x86_64.iso"
 		;;
 	esac
 
@@ -348,7 +348,7 @@ build_sys_gui() {
 	sudo mv "$customiso"/arch/"$sys"/squashfs-root/boot/vmlinuz-linux "$customiso"/arch/boot/"$sys"/vmlinuz
 	sudo mv "$customiso"/arch/"$sys"/squashfs-root/boot/initramfs-linux.img "$customiso"/arch/boot/"$sys"/archiso.img
 
-	### Configure xfce4
+	### Configure Desktop
 	sudo arch-chroot squashfs-root useradd -m -g users -G power,audio,video,storage -s /usr/bin/zsh user
 	sudo arch-chroot squashfs-root su user -c xdg-user-dirs-update
 	sudo sed -i 's/root/user/' "$customiso"/arch/"$sys"/squashfs-root/etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -363,15 +363,20 @@ build_sys_gui() {
 	sudo cp -r "$aa"/extra/gui/.automated_script.sh "$customiso"/arch/"$sys"/squashfs-root/home/user
 	sudo cp -r "$aa"/extra/.zshrc "$customiso"/arch/"$sys"/squashfs-root/home/user/.zshrc
 	sudo sed -i -e '$a\\nalias help="cat ~/.help"\nalias start="cat /etc/issue_cli"\nalias 1="anarchy"\nalias 2="anarchy -u"\nalias 3="arch-wiki"\nalias 4="iptest"\nalias 5="sysinfo"\nalias 6="fetchmirrors"' "$customiso"/arch/"$sys"/squashfs-root/home/user/.zshrc
+	sudo cp -r "$customiso"/arch/"$sys"/squashfs-root/root/.zlogin "$customiso"/arch/"$sys"/squashfs-root/home/user
+
+	### Extract gnome configuration
 	sudo tar xf "$aa"/extra/desktop/Anarchy-gnome/config.tar.gz -C "$customiso"/arch/"$sys"/squashfs-root/home/user/
 	sudo tar xf "$aa"/extra/desktop/Anarchy-gnome/config.tar.gz -C "$customiso"/arch/"$sys"/squashfs-root/root
-	sudo cp -r "$customiso"/arch/"$sys"/squashfs-root/root/.zlogin "$customiso"/arch/"$sys"/squashfs-root/home/user
-	sudo arch-chroot squashfs-root chown -R user /home/user/
 	sudo mkdir "$customiso"/arch/"$sys"/squashfs-root/usr/share/backgrounds/anarchy
 	sudo cp -r "$aa"/extra/wallpapers/Anarchy.jpeg "$customiso"/arch/"$sys"/squashfs-root/usr/share/backgrounds/anarchy
+
+	### Create xinitrc
 	echo "exec gnome-session" | sudo tee -a "$customiso"/arch/"$sys"/squashfs-root/root/.xinitrc >/dev/null
 	echo "exec gnome-session" | sudo tee -a "$customiso"/arch/"$sys"/squashfs-root/home/user/.xinitrc >/dev/null
 
+	### Fix permissions for user
+	sudo arch-chroot squashfs-root chown -R user /home/user/
 
 	### cd back into root system directory, remove old system
 	cd "$customiso"/arch/"$sys" || exit
